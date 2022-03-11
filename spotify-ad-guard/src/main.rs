@@ -1,4 +1,4 @@
-#![feature(io_safety, once_cell)]
+#![feature(io_safety, once_cell, maybe_uninit_uninit_array, maybe_uninit_slice)]
 #![warn(unsafe_op_in_unsafe_fn)]
 
 use std::{
