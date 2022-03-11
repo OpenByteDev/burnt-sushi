@@ -1,0 +1,30 @@
+[package]
+name = "spotify-ad-guard"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+dll-syringe = { version = "0.9", features = ["into-x86-from-x64", "rpc"], default-features = false }
+capnp = { version = "0.14", default-features = false }
+capnp-rpc = { version = "0.14", default-features = false }
+toml = { version = "0.5", default-features = false }
+serde = { version = "1.0", features = ["derive"], default-features = false }
+futures = { version = "0.3", default-features = false }
+tokio = { version = "1.17", features = ["net", "rt", "macros", "fs"], default-features = false }
+tokio-util = { version = "0.7", features = ["compat"], default-features = false }
+winapi = { version = "0.3", features = ["winuser", "tlhelp32"], default-features = false }
+wineventhook = { version = "0.2.1", default-features = false }
+project-uninit = { version = "0.1", default-features = false }
+fallible-iterator = { version = "0.2", default-features = false }
+async-thread = { version = "0.1", default-features = false }
+log = { version = "0.4", default-features = false }
+simple_logger = { version = "2.1", default-features = false }
+shared = { path = "../shared", default-features = false }
+
+[build-dependencies]
+cargo-emit = "0.2"
+walkdir = "2.3"
+
+[profile.release]
+strip = true  # Automatically strip symbols from the binary.
+lto = true
