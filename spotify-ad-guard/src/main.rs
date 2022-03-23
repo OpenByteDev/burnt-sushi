@@ -4,7 +4,7 @@
 use std::{
     fs, mem,
     net::SocketAddrV4,
-    path::{Path, PathBuf},
+    path::{Path, PathBuf}, env,
 };
 
 use dll_syringe::{
@@ -60,7 +60,7 @@ fn setup_logging() {
 fn prepare_payload() -> PayloadInfo {
     info!("Start preparing injection payload");
 
-    let payload_path = std::env::current_exe()
+    let payload_path = env::current_exe()
         .unwrap()
         .parent()
         .unwrap()
@@ -75,7 +75,7 @@ fn prepare_payload() -> PayloadInfo {
 }
 
 fn prepare_config() -> PathBuf {
-    let path = std::env::current_exe()
+    let path = env::current_exe()
         .unwrap()
         .parent()
         .unwrap()
@@ -146,11 +146,11 @@ impl AppState {
             info!("Found previously injected blocker");
 
             info!("Stopping RPC of previous blocker");
-            let stop_rpc = syringe
-                .get_procedure::<(), ()>(prev_payload, "stop_rpc")
+            let stop_rpc = unsafe { syringe
+                .get_payload_procedure::<fn()>(prev_payload, "stop_rpc") }
                 .unwrap()
                 .unwrap();
-            stop_rpc.call(&()).unwrap();
+            stop_rpc.call().unwrap();
 
             info!("Ejecting previous blocker...");
             syringe.eject(prev_payload).unwrap();
@@ -162,12 +162,12 @@ impl AppState {
         let payload = syringe.inject(&payload.path).unwrap();
 
         println!("Starting RPC...");
-        let start_rpc = syringe
-            .get_procedure::<(), SocketAddrV4>(payload, "start_rpc")
+        let start_rpc = unsafe { syringe
+            .get_payload_procedure::<fn() -> SocketAddrV4>(payload, "start_rpc") }
             .unwrap()
             .unwrap();
 
-        let rpc_socket_addr = start_rpc.call(&()).unwrap();
+        let rpc_socket_addr = start_rpc.call().unwrap();
 
         let filter_config = filter_config.to_path_buf();
         let rpc_task = async_thread::spawn(move || {
@@ -198,13 +198,13 @@ impl AppState {
         println!("Unhooking Spotify...");
 
         let result: Result<(), SyringeError> = async {
-            let stop_rpc = state
+            let stop_rpc = unsafe { state
                 .syringe
-                .get_procedure::<(), ()>(state.payload.borrowed(), "stop_rpc")?
+                .get_payload_procedure::<fn()>(state.payload.borrowed(), "stop_rpc") }? 
                 .unwrap();
 
             println!("Stopping RPC...");
-            stop_rpc.call(&())?;
+            stop_rpc.call()?;
             state.rpc_task.join().await.unwrap();
             println!("Stopped RPC");
 
@@ -219,7 +219,7 @@ impl AppState {
         .await;
 
         match result {
-            Ok(_) | Err(SyringeError::ProcessInaccessible) => {}
+            Ok(_) | Err(SyringeError::ProcessInaccessible) | Err(SyringeError::ModuleInaccessible) => {}
             _ => todo!("{:#?}", result),
         };
 

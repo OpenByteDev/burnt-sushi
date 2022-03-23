@@ -28,7 +28,7 @@ struct RpcState {
     socket_addr: SocketAddrV4,
 }
 
-dll_syringe_payload_utils::remote_procedure! {
+dll_syringe::payload_procedure! {
     fn start_rpc() -> SocketAddrV4 {
         let mut state = RPC_STATE.lock().unwrap();
         if let Some(state) = state.as_ref() {
@@ -56,7 +56,7 @@ dll_syringe_payload_utils::remote_procedure! {
     }
 }
 
-dll_syringe_payload_utils::remote_procedure! {
+dll_syringe::payload_procedure! {
     fn stop_rpc() {
         let mut state = RPC_STATE.lock().unwrap();
         if let Some(state) = state.take() {
