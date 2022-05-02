@@ -28,7 +28,10 @@ jobs:
           target: x86_64-pc-windows-msvc
           toolchain: nightly
           override: true
-          
+    
+    - name: Install Cap'n Proto
+      run: choco install capnproto
+      
     - name: Build burnt-sushi-blocker
       run: cargo build --manifest-path=burnt-sushi-blocker/Cargo.toml --target i686-pc-windows-msvc
           
