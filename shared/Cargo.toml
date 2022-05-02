@@ -1,7 +1,13 @@
 [package]
 name = "shared"
 version = "0.1.0"
+description = "Spotify AdBlocker for Windows"
+readme = "../README.md"
+repository = "https://github.com/OpenByteDev/burnt-sushi"
+license = "MIT"
+authors = ["OpenByte <development.openbyte@gmail.com>"]
 edition = "2021"
+keywords = ["spotify", "adblocker", "windows", "blocker", "payload"]
 
 [dependencies]
 capnp = { version = "0.14", default-features = false }

@@ -1,7 +1,13 @@
 [package]
 name = "burnt-sushi-blocker"
 version = "0.1.0"
+description = "Spotify AdBlocker for Windows"
+readme = "../README.md"
+repository = "https://github.com/OpenByteDev/burnt-sushi"
+license = "MIT"
+authors = ["OpenByte <development.openbyte@gmail.com>"]
 edition = "2021"
+keywords = ["spotify", "adblocker", "windows", "blocker", "payload"]
 
 [dependencies]
 dll-syringe = { version = "0.11", features = ["payload-utils"], default-features = true }
