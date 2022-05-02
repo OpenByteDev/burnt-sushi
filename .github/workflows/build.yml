@@ -18,15 +18,15 @@ jobs:
     - name: Install latest nightly for i686-pc-windows-msvc
       uses: actions-rs/toolchain@v1
       with:
-          target: nightly
-          toolchain: i686-pc-windows-msvc
+          target: i686-pc-windows-msvc
+          toolchain: nightly
           override: true
     
     - name: Install latest nightly for x86_64-pc-windows-msvc
       uses: actions-rs/toolchain@v1
       with:
-          target: nightly
-          toolchain: x86_64-pc-windows-msvc
+          target: x86_64-pc-windows-msvc
+          toolchain: nightly
           override: true
           
     - name: Build burnt-sushi-blocker
