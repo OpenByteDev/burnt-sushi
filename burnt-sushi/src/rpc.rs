@@ -1,10 +1,10 @@
-use std::path::Path;
-
 use ::capnp::capability::Promise;
 use capnp_rpc::{pry, rpc_twoparty_capnp, twoparty, RpcSystem};
 use futures::{AsyncReadExt, FutureExt};
-use serde::Deserialize;
+use log::{info, trace};
 use tokio::net::ToSocketAddrs;
+
+use crate::FilterConfig;
 
 struct LoggerImpl;
 
@@ -20,7 +20,7 @@ impl shared::rpc::blocker_service::logger::Server for LoggerImpl {
         let hook_name = pry!(request.get_hook());
         let url = pry!(request.get_url());
 
-        println!("[{}] ({}) {}", block_sign, hook_name, url);
+        trace!("[{}] ({}) {}", block_sign, hook_name, url);
 
         Promise::ok(())
     }
@@ -31,26 +31,20 @@ impl shared::rpc::blocker_service::logger::Server for LoggerImpl {
         mut _results: shared::rpc::blocker_service::logger::LogMessageResults,
     ) -> Promise<(), ::capnp::Error> {
         let message = pry!(pry!(params.get()).get_message());
-        println!("{}", message);
+        info!("{}", message);
 
         Promise::ok(())
     }
 }
 
-#[derive(Deserialize)]
-struct FilterConfig {
-    allowlist: Vec<String>,
-    denylist: Vec<String>,
-}
-
 pub async fn run(
     socket_addr: impl ToSocketAddrs,
-    filter_config: impl AsRef<Path>,
+    filter_config: FilterConfig,
 ) -> Result<(), Box<dyn std::error::Error>> {
     tokio::task::LocalSet::new()
         .run_until(async move {
             let stream = tokio::net::TcpStream::connect(socket_addr).await?;
-            println!("Connected to {}", stream.peer_addr()?);
+            info!("Connected to {}", stream.peer_addr()?);
 
             stream.set_nodelay(true)?;
             let (reader, writer) =
@@ -72,9 +66,6 @@ pub async fn run(
                 .get()
                 .set_logger(capnp_rpc::new_client(LoggerImpl));
             register_logger_request.send().promise.await?;
-
-            let filter_config_str = tokio::fs::read_to_string(filter_config.as_ref()).await?;
-            let filter_config: FilterConfig = toml::from_str(&filter_config_str)?;
 
             {
                 let mut set_ruleset_request = client.set_ruleset_request();

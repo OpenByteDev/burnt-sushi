@@ -1,5 +1,5 @@
 [package]
-name = "inject-payload"
+name = "burnt-sushi-blocker"
 version = "0.1.0"
 edition = "2021"
 
@@ -8,7 +8,7 @@ dll-syringe = { version = "0.11", features = ["payload-utils"], default-features
 capnp = { version = "0.14", default-features = false }
 capnp-rpc = { version = "0.14", default-features = false }
 futures = { version = "0.3", default-features = false }
-tokio = { version = "1.17", features = ["net", "rt", "macros", "sync"], default-features = false }
+tokio = { version = "1.18", features = ["net", "rt", "macros", "sync"], default-features = false }
 tokio-util = { version = "0.7", features = ["compat"], default-features = false }
 winapi = { version = "0.3", features = ["ws2tcpip", "rpc"], default-features = false }
 detour = { version = "0.8", features = ["nightly"], default-features = false }

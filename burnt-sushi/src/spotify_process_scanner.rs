@@ -26,9 +26,7 @@ use winapi::{
         },
     },
 };
-use wineventhook::{
-    raw_event, AccessibleObjectId, EventFilter, WindowEventHook, WindowHandle,
-};
+use wineventhook::{raw_event, AccessibleObjectId, EventFilter, WindowEventHook, WindowHandle};
 
 #[derive(Debug)]
 pub struct SpotifyProcessScanner {
@@ -136,8 +134,7 @@ impl SpotifyProcessScanner {
                 .skip_own_process(true)
                 .event(raw_event::OBJECT_SHOW)
                 .predicate(|event| {
-                    event.child_id().is_none()
-                        && event.object_type() == AccessibleObjectId::Window
+                    event.child_id().is_none() && event.object_type() == AccessibleObjectId::Window
                 }),
             event_tx,
         )
@@ -179,8 +176,7 @@ impl SpotifyProcessScanner {
                 .skip_own_process(true)
                 .event(raw_event::OBJECT_DESTROY)
                 .predicate(|event| {
-                    event.child_id().is_none()
-                        && event.object_type() == AccessibleObjectId::Window
+                    event.child_id().is_none() && event.object_type() == AccessibleObjectId::Window
                 }),
             event_tx,
         )
@@ -195,7 +191,8 @@ impl SpotifyProcessScanner {
 
                 break Some(SpotifyState::Stopped);
             } else {
-                break None}
+                break None;
+            }
         };
 
         event_hook.unhook().await?;
