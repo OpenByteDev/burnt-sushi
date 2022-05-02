@@ -30,12 +30,18 @@ fn build_crate(name: &str, target: &str, file: &str) -> PathBuf {
     crate_dir.push(name);
     cargo_emit::rerun_if_changed!("..\\{}", name);
 
-    let status = Command::new(&cargo_exe)
+    let mut command = Command::new(&cargo_exe);
+    command
         .arg("build")
         .arg("--target")
         .arg(target)
-        .arg(if is_release { "--release" } else { "" })
-        .current_dir(&crate_dir)
+        .current_dir(&crate_dir);
+
+    if is_release {
+        command.arg("--release");
+    }
+
+    let status = command
         .spawn()
         .unwrap()
         .wait()
