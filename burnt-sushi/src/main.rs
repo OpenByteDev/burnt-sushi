@@ -6,8 +6,8 @@
     let_chains
 )]
 #![warn(unsafe_op_in_unsafe_fn)]
-#![allow(clippy::module_inception)]
-// #![windows_subsystem = "windows"]
+#![allow(clippy::module_inception, non_snake_case)]
+#![windows_subsystem = "windows"]
 
 use std::{
     env, io,
@@ -311,7 +311,7 @@ impl AppState {
                 include_bytes!(concat!(env!("OUT_DIR"), "\\BurntSushiBlocker_x86.dll"));
 
             trace!("Looking for blocker at '{}'", path.display());
-            if let Ok(metadata) =  tokio::fs::metadata(path).await {
+            if let Ok(metadata) = tokio::fs::metadata(path).await {
                 if metadata.is_file() {
                     trace!("Found blocker at '{}'", path.display());
                     return if check_len && metadata.len() != payload_bytes.len() as u64 {
@@ -340,7 +340,7 @@ impl AppState {
 
         trace!("Looking for blocker according to cli args...");
         if let Some(config_path) = &ARGS.blocker {
-            if try_load_blocker(&config_path, false, true).await.is_ok() {
+            if try_load_blocker(config_path, false, true).await.is_ok() {
                 return Ok(config_path.to_path_buf());
             } else {
                 trace!("Looking for blocker according to cli args...");
@@ -404,8 +404,8 @@ impl AppState {
         }
 
         fn try_load_filter_config_from_str(filter_config: &str) -> io::Result<FilterConfig> {
-            match toml::from_str(&filter_config) {
-                Ok(filter_config) => return Ok(filter_config),
+            match toml::from_str(filter_config) {
+                Ok(filter_config) => Ok(filter_config),
                 Err(_) => {
                     warn!("Failed to parse filter config.");
                     Err(io::Error::new(
@@ -418,7 +418,7 @@ impl AppState {
 
         trace!("Looking for filter config according to cli args...");
         if let Some(config_path) = &ARGS.filters {
-            if let Ok(filters) = try_load_filter_config_from_path(Some(&config_path), true).await {
+            if let Ok(filters) = try_load_filter_config_from_path(Some(config_path), true).await {
                 return Ok(filters);
             }
         }
