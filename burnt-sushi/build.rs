@@ -34,6 +34,7 @@ fn build_crate(name: &str, target: &str, file: &str) -> PathBuf {
         .arg("build")
         .arg("--target")
         .arg(target)
+        .arg(if is_release { "--release" } else { "" })
         .current_dir(&crate_dir)
         .spawn()
         .unwrap()
