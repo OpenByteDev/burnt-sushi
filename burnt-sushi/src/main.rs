@@ -37,6 +37,7 @@ mod spotify_process_scanner;
 mod tray;
 
 const APP_NAME: &str = "BurntSushi";
+const APP_AUTHOR: &str = "OpenByteDev";
 // const APP_VERSION: &str = env!("CARGO_PKG_VERSION");
 const APP_NAME_WITH_VERSION: &str = concat!("BurntSushi v", env!("CARGO_PKG_VERSION"));
 const DEFAULT_BLOCKER_FILE_NAME: &str = "BurntSushiBlocker_x86.dll";
@@ -314,15 +315,11 @@ impl AppState {
             if let Ok(metadata) = tokio::fs::metadata(path).await {
                 if metadata.is_file() {
                     trace!("Found blocker at '{}'", path.display());
-                    return if check_len && metadata.len() != payload_bytes.len() as u64 {
+                    if check_len && metadata.len() != payload_bytes.len() as u64 {
                         trace!("Blocker at '{}' is incorrect size.", path.display());
-                        Err(io::Error::new(
-                            io::ErrorKind::InvalidData,
-                            "Blocker has incorrect size.",
-                        ))
                     } else {
-                        Ok(())
-                    };
+                        return Ok(());
+                    }
                 }
             }
             if write_if_absent {
@@ -359,7 +356,8 @@ impl AppState {
 
         trace!("Looking for existing blocker in temporary directory...");
         if let Some(temp_path) = env::temp_dir().parent().map(|p| {
-            p.join(APP_NAME_WITH_VERSION)
+            p.join(APP_AUTHOR)
+                .join(APP_NAME_WITH_VERSION)
                 .join(DEFAULT_BLOCKER_FILE_NAME)
         }) {
             if try_load_blocker(&temp_path, true, true).await.is_ok() {
