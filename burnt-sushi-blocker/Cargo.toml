@@ -29,3 +29,4 @@ crate_type = ["cdylib"]
 [profile.release]
 strip = true  # Automatically strip symbols from the binary.
 lto = true
+opt-level = 3

@@ -39,6 +39,7 @@ embed-resource = "1.7"
 [profile.release]
 strip = true  # Automatically strip symbols from the binary.
 lto = true
+opt-level = 3
 
 [[bin]]
 name = "BurntSushi"

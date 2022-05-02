@@ -17,3 +17,8 @@ enum-map = { version = "2.0", default-features = false }
 [build-dependencies]
 capnpc = "0.14"
 cargo-emit = "0.2"
+
+[profile.release]
+strip = true  # Automatically strip symbols from the binary.
+lto = true
+opt-level = 3
