@@ -16,5 +16,16 @@ jobs:
 
     steps:
     - uses: actions/checkout@v3
-    - name: Build
-      run: cargo build --verbose
+    
+    - name: Install latest ${{ matrix.toolchain }}
+      uses: actions-rs/toolchain@v1
+      with:
+          target: ${{ matrix.target }}
+          toolchain: ${{ matrix.toolchain }}
+          override: true
+          
+    - name: Build burnt-sushi-blocker
+      run: cargo build --manifest-path=burnt-sushi-blocker/Cargo.toml --target i686-pc-windows-msvc
+          
+    - name: Build burnt-sushi
+      run: cargo build --manifest-path=shared/Cargo.toml
