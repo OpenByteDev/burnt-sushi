@@ -4,6 +4,20 @@
 
 A Spotify AdBlocker for Windows that works via DLL injection and function hooking.
 
+## Installation
+The latest version can be downloaded [here](https://github.com/OpenByteDev/burnt-sushi/releases/tag/0.1.0). The app is portable and there is no need for an installation.
+
+## FAQ
+### How does it work?
+BurntSushi works by intercepting network requests and blocking ones that match a set of [filters](https://github.com/OpenByteDev/burnt-sushi/blob/master/filter.toml). This is implemented by injecting a dynamic library into the Spotify process that overrides [`getaddrinfo`](https://docs.microsoft.com/en-us/windows/win32/api/ws2tcpip/nf-ws2tcpip-getaddrinfo) from the Windows API and `cef_urlrequest_create` from [libcef](https://github.com/chromiumembedded/cef).
+The status of the Spotify process is determined using [`wineventhook`](https://github.com/OpenByteDev/wineventhook-rs) which is based on [`SetWinEventHook`](https://docs.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-setwineventhook).
+
+### Can this be detected by Spotify?
+Theoretically yes, but practically it probably won't.
+
+### Does it work on Linux?
+No, BurntSushi supports Windows only, but you can check out [spotify-adblock](https://github.com/abba23/spotify-adblock) instead.
+
 ## Credits
 Inspired by https://github.com/abba23/spotify-adblock
 
