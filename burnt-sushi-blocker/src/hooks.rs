@@ -54,8 +54,12 @@ pub fn enable(
 }
 
 pub fn disable() -> Result<(), Box<dyn std::error::Error>> {
-    unsafe { GetAddrInfoHook.disable()? };
-    unsafe { CefUrlRequestCreateHook.disable()? };
+    if GetAddrInfoHook.is_enabled() {
+        unsafe { GetAddrInfoHook.disable() }?;
+    }
+    if CefUrlRequestCreateHook.is_enabled() {
+        unsafe { CefUrlRequestCreateHook.disable()? };
+    }
     Ok(())
 }
 

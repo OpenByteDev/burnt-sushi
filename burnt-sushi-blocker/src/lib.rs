@@ -60,6 +60,7 @@ dll_syringe::payload_procedure! {
     fn stop_rpc() {
         let mut state = RPC_STATE.lock().unwrap();
         if let Some(state) = state.take() {
+            hooks::disable().unwrap();
             state.rpc_disconnector.send(()).unwrap();
             state.rpc_thread.join().unwrap();
         }
