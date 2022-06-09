@@ -41,11 +41,7 @@ fn build_crate(name: &str, target: &str, file: &str) -> PathBuf {
         command.arg("--release");
     }
 
-    let status = command
-        .spawn()
-        .unwrap()
-        .wait()
-        .unwrap();
+    let status = command.spawn().unwrap().wait().unwrap();
     assert!(status.success());
 
     let mut crate_artifact = crate_dir;

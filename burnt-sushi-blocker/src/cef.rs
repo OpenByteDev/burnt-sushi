@@ -628,7 +628,8 @@ pub type cef_composition_underline_t = _cef_composition_underline_t;
 pub struct _cef_base_ref_counted_t {
     pub size: size_t,
     pub add_ref: unsafe extern "system" fn(self_: *mut _cef_base_ref_counted_t),
-    pub release: unsafe extern "system" fn(self_: *mut _cef_base_ref_counted_t) -> ::std::os::raw::c_int,
+    pub release:
+        unsafe extern "system" fn(self_: *mut _cef_base_ref_counted_t) -> ::std::os::raw::c_int,
     pub has_one_ref:
         unsafe extern "system" fn(self_: *mut _cef_base_ref_counted_t) -> ::std::os::raw::c_int,
     pub has_at_least_one_ref:
@@ -653,16 +654,19 @@ pub struct _cef_request_t {
     pub get_url: unsafe extern "system" fn(self_: *mut _cef_request_t) -> cef_string_userfree_t,
     pub set_url: unsafe extern "system" fn(self_: *mut _cef_request_t, url: *const cef_string_t),
     pub get_method: unsafe extern "system" fn(self_: *mut _cef_request_t) -> cef_string_userfree_t,
-    pub set_method: unsafe extern "system" fn(self_: *mut _cef_request_t, method: *const cef_string_t),
+    pub set_method:
+        unsafe extern "system" fn(self_: *mut _cef_request_t, method: *const cef_string_t),
     pub set_referrer: unsafe extern "system" fn(
         self_: *mut _cef_request_t,
         referrer_url: *const cef_string_t,
         policy: cef_referrer_policy_t,
     ),
-    pub get_referrer_url: unsafe extern "system" fn(self_: *mut _cef_request_t) -> cef_string_userfree_t,
+    pub get_referrer_url:
+        unsafe extern "system" fn(self_: *mut _cef_request_t) -> cef_string_userfree_t,
     pub get_referrer_policy:
         unsafe extern "system" fn(self_: *mut _cef_request_t) -> cef_referrer_policy_t,
-    pub get_post_data: unsafe extern "system" fn(self_: *mut _cef_request_t) -> *mut _cef_post_data_t,
+    pub get_post_data:
+        unsafe extern "system" fn(self_: *mut _cef_request_t) -> *mut _cef_post_data_t,
     pub set_post_data:
         unsafe extern "system" fn(self_: *mut _cef_request_t, postData: *mut _cef_post_data_t),
     pub get_header_map:
@@ -687,12 +691,14 @@ pub struct _cef_request_t {
         headerMap: cef_string_multimap_t,
     ),
     pub get_flags: unsafe extern "system" fn(self_: *mut _cef_request_t) -> ::std::os::raw::c_int,
-    pub set_flags: unsafe extern "system" fn(self_: *mut _cef_request_t, flags: ::std::os::raw::c_int),
+    pub set_flags:
+        unsafe extern "system" fn(self_: *mut _cef_request_t, flags: ::std::os::raw::c_int),
     pub get_first_party_for_cookies:
         unsafe extern "system" fn(self_: *mut _cef_request_t) -> cef_string_userfree_t,
     pub set_first_party_for_cookies:
         unsafe extern "system" fn(self_: *mut _cef_request_t, url: *const cef_string_t),
-    pub get_resource_type: unsafe extern "system" fn(self_: *mut _cef_request_t) -> cef_resource_type_t,
+    pub get_resource_type:
+        unsafe extern "system" fn(self_: *mut _cef_request_t) -> cef_resource_type_t,
     pub get_transition_type:
         unsafe extern "system" fn(self_: *mut _cef_request_t) -> cef_transition_type_t,
     pub get_identifier: unsafe extern "system" fn(self_: *mut _cef_request_t) -> uint64,
@@ -700,7 +706,8 @@ pub struct _cef_request_t {
 #[repr(C)]
 pub struct _cef_post_data_t {
     pub base: cef_base_ref_counted_t,
-    pub is_read_only: unsafe extern "system" fn(self_: *mut _cef_post_data_t) -> ::std::os::raw::c_int,
+    pub is_read_only:
+        unsafe extern "system" fn(self_: *mut _cef_post_data_t) -> ::std::os::raw::c_int,
     pub has_excluded_elements:
         unsafe extern "system" fn(self_: *mut _cef_post_data_t) -> ::std::os::raw::c_int,
     pub get_element_count: unsafe extern "system" fn(self_: *mut _cef_post_data_t) -> size_t,
@@ -725,15 +732,18 @@ pub struct _cef_post_data_element_t {
     pub is_read_only:
         unsafe extern "system" fn(self_: *mut _cef_post_data_element_t) -> ::std::os::raw::c_int,
     pub set_to_empty: unsafe extern "system" fn(self_: *mut _cef_post_data_element_t),
-    pub set_to_file:
-        unsafe extern "system" fn(self_: *mut _cef_post_data_element_t, fileName: *const cef_string_t),
+    pub set_to_file: unsafe extern "system" fn(
+        self_: *mut _cef_post_data_element_t,
+        fileName: *const cef_string_t,
+    ),
     pub set_to_bytes: unsafe extern "system" fn(
         self_: *mut _cef_post_data_element_t,
         size: size_t,
         bytes: *const ::std::os::raw::c_void,
     ),
-    pub get_type:
-        unsafe extern "system" fn(self_: *mut _cef_post_data_element_t) -> cef_postdataelement_type_t,
+    pub get_type: unsafe extern "system" fn(
+        self_: *mut _cef_post_data_element_t,
+    ) -> cef_postdataelement_type_t,
     pub get_file:
         unsafe extern "system" fn(self_: *mut _cef_post_data_element_t) -> cef_string_userfree_t,
     pub get_bytes_count: unsafe extern "system" fn(self_: *mut _cef_post_data_element_t) -> size_t,
@@ -866,8 +876,10 @@ pub struct _cef_value_t {
 #[repr(C)]
 pub struct _cef_binary_value_t {
     pub base: cef_base_ref_counted_t,
-    pub is_valid: unsafe extern "system" fn(self_: *mut _cef_binary_value_t) -> ::std::os::raw::c_int,
-    pub is_owned: unsafe extern "system" fn(self_: *mut _cef_binary_value_t) -> ::std::os::raw::c_int,
+    pub is_valid:
+        unsafe extern "system" fn(self_: *mut _cef_binary_value_t) -> ::std::os::raw::c_int,
+    pub is_owned:
+        unsafe extern "system" fn(self_: *mut _cef_binary_value_t) -> ::std::os::raw::c_int,
     pub is_same: unsafe extern "system" fn(
         self_: *mut _cef_binary_value_t,
         that: *mut _cef_binary_value_t,
@@ -876,7 +888,8 @@ pub struct _cef_binary_value_t {
         self_: *mut _cef_binary_value_t,
         that: *mut _cef_binary_value_t,
     ) -> ::std::os::raw::c_int,
-    pub copy: unsafe extern "system" fn(self_: *mut _cef_binary_value_t) -> *mut _cef_binary_value_t,
+    pub copy:
+        unsafe extern "system" fn(self_: *mut _cef_binary_value_t) -> *mut _cef_binary_value_t,
     pub get_size: unsafe extern "system" fn(self_: *mut _cef_binary_value_t) -> size_t,
     pub get_data: unsafe extern "system" fn(
         self_: *mut _cef_binary_value_t,
@@ -907,7 +920,8 @@ pub struct _cef_dictionary_value_t {
         exclude_empty_children: ::std::os::raw::c_int,
     ) -> *mut _cef_dictionary_value_t,
     pub get_size: unsafe extern "system" fn(self_: *mut _cef_dictionary_value_t) -> size_t,
-    pub clear: unsafe extern "system" fn(self_: *mut _cef_dictionary_value_t) -> ::std::os::raw::c_int,
+    pub clear:
+        unsafe extern "system" fn(self_: *mut _cef_dictionary_value_t) -> ::std::os::raw::c_int,
     pub has_key: unsafe extern "system" fn(
         self_: *mut _cef_dictionary_value_t,
         key: *const cef_string_t,
@@ -936,8 +950,10 @@ pub struct _cef_dictionary_value_t {
         self_: *mut _cef_dictionary_value_t,
         key: *const cef_string_t,
     ) -> ::std::os::raw::c_int,
-    pub get_double:
-        unsafe extern "system" fn(self_: *mut _cef_dictionary_value_t, key: *const cef_string_t) -> f64,
+    pub get_double: unsafe extern "system" fn(
+        self_: *mut _cef_dictionary_value_t,
+        key: *const cef_string_t,
+    ) -> f64,
     pub get_string: unsafe extern "system" fn(
         self_: *mut _cef_dictionary_value_t,
         key: *const cef_string_t,
@@ -1004,7 +1020,8 @@ pub struct _cef_list_value_t {
     pub base: cef_base_ref_counted_t,
     pub is_valid: unsafe extern "system" fn(self_: *mut _cef_list_value_t) -> ::std::os::raw::c_int,
     pub is_owned: unsafe extern "system" fn(self_: *mut _cef_list_value_t) -> ::std::os::raw::c_int,
-    pub is_read_only: unsafe extern "system" fn(self_: *mut _cef_list_value_t) -> ::std::os::raw::c_int,
+    pub is_read_only:
+        unsafe extern "system" fn(self_: *mut _cef_list_value_t) -> ::std::os::raw::c_int,
     pub is_same: unsafe extern "system" fn(
         self_: *mut _cef_list_value_t,
         that: *mut _cef_list_value_t,
@@ -1014,23 +1031,35 @@ pub struct _cef_list_value_t {
         that: *mut _cef_list_value_t,
     ) -> ::std::os::raw::c_int,
     pub copy: unsafe extern "system" fn(self_: *mut _cef_list_value_t) -> *mut _cef_list_value_t,
-    pub set_size:
-        unsafe extern "system" fn(self_: *mut _cef_list_value_t, size: size_t) -> ::std::os::raw::c_int,
+    pub set_size: unsafe extern "system" fn(
+        self_: *mut _cef_list_value_t,
+        size: size_t,
+    ) -> ::std::os::raw::c_int,
     pub get_size: unsafe extern "system" fn(self_: *mut _cef_list_value_t) -> size_t,
     pub clear: unsafe extern "system" fn(self_: *mut _cef_list_value_t) -> ::std::os::raw::c_int,
-    pub remove:
-        unsafe extern "system" fn(self_: *mut _cef_list_value_t, index: size_t) -> ::std::os::raw::c_int,
+    pub remove: unsafe extern "system" fn(
+        self_: *mut _cef_list_value_t,
+        index: size_t,
+    ) -> ::std::os::raw::c_int,
     pub get_type:
         unsafe extern "system" fn(self_: *mut _cef_list_value_t, index: size_t) -> cef_value_type_t,
-    pub get_value:
-        unsafe extern "system" fn(self_: *mut _cef_list_value_t, index: size_t) -> *mut _cef_value_t,
-    pub get_bool:
-        unsafe extern "system" fn(self_: *mut _cef_list_value_t, index: size_t) -> ::std::os::raw::c_int,
-    pub get_int:
-        unsafe extern "system" fn(self_: *mut _cef_list_value_t, index: size_t) -> ::std::os::raw::c_int,
+    pub get_value: unsafe extern "system" fn(
+        self_: *mut _cef_list_value_t,
+        index: size_t,
+    ) -> *mut _cef_value_t,
+    pub get_bool: unsafe extern "system" fn(
+        self_: *mut _cef_list_value_t,
+        index: size_t,
+    ) -> ::std::os::raw::c_int,
+    pub get_int: unsafe extern "system" fn(
+        self_: *mut _cef_list_value_t,
+        index: size_t,
+    ) -> ::std::os::raw::c_int,
     pub get_double: unsafe extern "system" fn(self_: *mut _cef_list_value_t, index: size_t) -> f64,
-    pub get_string:
-        unsafe extern "system" fn(self_: *mut _cef_list_value_t, index: size_t) -> cef_string_userfree_t,
+    pub get_string: unsafe extern "system" fn(
+        self_: *mut _cef_list_value_t,
+        index: size_t,
+    ) -> cef_string_userfree_t,
     pub get_binary: unsafe extern "system" fn(
         self_: *mut _cef_list_value_t,
         index: size_t,
@@ -1048,8 +1077,10 @@ pub struct _cef_list_value_t {
         index: size_t,
         value: *mut _cef_value_t,
     ) -> ::std::os::raw::c_int,
-    pub set_null:
-        unsafe extern "system" fn(self_: *mut _cef_list_value_t, index: size_t) -> ::std::os::raw::c_int,
+    pub set_null: unsafe extern "system" fn(
+        self_: *mut _cef_list_value_t,
+        index: size_t,
+    ) -> ::std::os::raw::c_int,
     pub set_bool: unsafe extern "system" fn(
         self_: *mut _cef_list_value_t,
         index: size_t,
@@ -1089,7 +1120,8 @@ pub struct _cef_list_value_t {
 #[repr(C)]
 pub struct _cef_extension_t {
     pub base: cef_base_ref_counted_t,
-    pub get_identifier: unsafe extern "system" fn(self_: *mut _cef_extension_t) -> cef_string_userfree_t,
+    pub get_identifier:
+        unsafe extern "system" fn(self_: *mut _cef_extension_t) -> cef_string_userfree_t,
     pub get_path: unsafe extern "system" fn(self_: *mut _cef_extension_t) -> cef_string_userfree_t,
     pub get_manifest:
         unsafe extern "system" fn(self_: *mut _cef_extension_t) -> *mut _cef_dictionary_value_t,
@@ -1136,10 +1168,14 @@ pub struct _cef_image_t {
     ) -> ::std::os::raw::c_int,
     pub get_width: unsafe extern "system" fn(self_: *mut _cef_image_t) -> size_t,
     pub get_height: unsafe extern "system" fn(self_: *mut _cef_image_t) -> size_t,
-    pub has_representation:
-        unsafe extern "system" fn(self_: *mut _cef_image_t, scale_factor: f32) -> ::std::os::raw::c_int,
-    pub remove_representation:
-        unsafe extern "system" fn(self_: *mut _cef_image_t, scale_factor: f32) -> ::std::os::raw::c_int,
+    pub has_representation: unsafe extern "system" fn(
+        self_: *mut _cef_image_t,
+        scale_factor: f32,
+    ) -> ::std::os::raw::c_int,
+    pub remove_representation: unsafe extern "system" fn(
+        self_: *mut _cef_image_t,
+        scale_factor: f32,
+    ) -> ::std::os::raw::c_int,
     pub get_representation_info: unsafe extern "system" fn(
         self_: *mut _cef_image_t,
         scale_factor: f32,
@@ -1186,7 +1222,8 @@ pub struct _cef_stream_reader_t {
     ) -> ::std::os::raw::c_int,
     pub tell: unsafe extern "system" fn(self_: *mut _cef_stream_reader_t) -> int64,
     pub eof: unsafe extern "system" fn(self_: *mut _cef_stream_reader_t) -> ::std::os::raw::c_int,
-    pub may_block: unsafe extern "system" fn(self_: *mut _cef_stream_reader_t) -> ::std::os::raw::c_int,
+    pub may_block:
+        unsafe extern "system" fn(self_: *mut _cef_stream_reader_t) -> ::std::os::raw::c_int,
 }
 #[repr(C)]
 pub struct _cef_stream_writer_t {
@@ -1204,18 +1241,23 @@ pub struct _cef_stream_writer_t {
     ) -> ::std::os::raw::c_int,
     pub tell: unsafe extern "system" fn(self_: *mut _cef_stream_writer_t) -> int64,
     pub flush: unsafe extern "system" fn(self_: *mut _cef_stream_writer_t) -> ::std::os::raw::c_int,
-    pub may_block: unsafe extern "system" fn(self_: *mut _cef_stream_writer_t) -> ::std::os::raw::c_int,
+    pub may_block:
+        unsafe extern "system" fn(self_: *mut _cef_stream_writer_t) -> ::std::os::raw::c_int,
 }
 #[repr(C)]
 pub struct _cef_drag_data_t {
     pub base: cef_base_ref_counted_t,
     pub clone: unsafe extern "system" fn(self_: *mut _cef_drag_data_t) -> *mut _cef_drag_data_t,
-    pub is_read_only: unsafe extern "system" fn(self_: *mut _cef_drag_data_t) -> ::std::os::raw::c_int,
+    pub is_read_only:
+        unsafe extern "system" fn(self_: *mut _cef_drag_data_t) -> ::std::os::raw::c_int,
     pub is_link: unsafe extern "system" fn(self_: *mut _cef_drag_data_t) -> ::std::os::raw::c_int,
-    pub is_fragment: unsafe extern "system" fn(self_: *mut _cef_drag_data_t) -> ::std::os::raw::c_int,
+    pub is_fragment:
+        unsafe extern "system" fn(self_: *mut _cef_drag_data_t) -> ::std::os::raw::c_int,
     pub is_file: unsafe extern "system" fn(self_: *mut _cef_drag_data_t) -> ::std::os::raw::c_int,
-    pub get_link_url: unsafe extern "system" fn(self_: *mut _cef_drag_data_t) -> cef_string_userfree_t,
-    pub get_link_title: unsafe extern "system" fn(self_: *mut _cef_drag_data_t) -> cef_string_userfree_t,
+    pub get_link_url:
+        unsafe extern "system" fn(self_: *mut _cef_drag_data_t) -> cef_string_userfree_t,
+    pub get_link_title:
+        unsafe extern "system" fn(self_: *mut _cef_drag_data_t) -> cef_string_userfree_t,
     pub get_link_metadata:
         unsafe extern "system" fn(self_: *mut _cef_drag_data_t) -> cef_string_userfree_t,
     pub get_fragment_text:
@@ -1224,7 +1266,8 @@ pub struct _cef_drag_data_t {
         unsafe extern "system" fn(self_: *mut _cef_drag_data_t) -> cef_string_userfree_t,
     pub get_fragment_base_url:
         unsafe extern "system" fn(self_: *mut _cef_drag_data_t) -> cef_string_userfree_t,
-    pub get_file_name: unsafe extern "system" fn(self_: *mut _cef_drag_data_t) -> cef_string_userfree_t,
+    pub get_file_name:
+        unsafe extern "system" fn(self_: *mut _cef_drag_data_t) -> cef_string_userfree_t,
     pub get_file_contents: unsafe extern "system" fn(
         self_: *mut _cef_drag_data_t,
         writer: *mut _cef_stream_writer_t,
@@ -1233,7 +1276,8 @@ pub struct _cef_drag_data_t {
         self_: *mut _cef_drag_data_t,
         names: cef_string_list_t,
     ) -> ::std::os::raw::c_int,
-    pub set_link_url: unsafe extern "system" fn(self_: *mut _cef_drag_data_t, url: *const cef_string_t),
+    pub set_link_url:
+        unsafe extern "system" fn(self_: *mut _cef_drag_data_t, url: *const cef_string_t),
     pub set_link_title:
         unsafe extern "system" fn(self_: *mut _cef_drag_data_t, title: *const cef_string_t),
     pub set_link_metadata:
@@ -1263,11 +1307,14 @@ pub struct _cef_domvisitor_t {
 #[repr(C)]
 pub struct _cef_domdocument_t {
     pub base: cef_base_ref_counted_t,
-    pub get_type: unsafe extern "system" fn(self_: *mut _cef_domdocument_t) -> cef_dom_document_type_t,
-    pub get_document: unsafe extern "system" fn(self_: *mut _cef_domdocument_t) -> *mut _cef_domnode_t,
+    pub get_type:
+        unsafe extern "system" fn(self_: *mut _cef_domdocument_t) -> cef_dom_document_type_t,
+    pub get_document:
+        unsafe extern "system" fn(self_: *mut _cef_domdocument_t) -> *mut _cef_domnode_t,
     pub get_body: unsafe extern "system" fn(self_: *mut _cef_domdocument_t) -> *mut _cef_domnode_t,
     pub get_head: unsafe extern "system" fn(self_: *mut _cef_domdocument_t) -> *mut _cef_domnode_t,
-    pub get_title: unsafe extern "system" fn(self_: *mut _cef_domdocument_t) -> cef_string_userfree_t,
+    pub get_title:
+        unsafe extern "system" fn(self_: *mut _cef_domdocument_t) -> cef_string_userfree_t,
     pub get_element_by_id: unsafe extern "system" fn(
         self_: *mut _cef_domdocument_t,
         id: *const cef_string_t,
@@ -1284,7 +1331,8 @@ pub struct _cef_domdocument_t {
         unsafe extern "system" fn(self_: *mut _cef_domdocument_t) -> cef_string_userfree_t,
     pub get_selection_as_text:
         unsafe extern "system" fn(self_: *mut _cef_domdocument_t) -> cef_string_userfree_t,
-    pub get_base_url: unsafe extern "system" fn(self_: *mut _cef_domdocument_t) -> cef_string_userfree_t,
+    pub get_base_url:
+        unsafe extern "system" fn(self_: *mut _cef_domdocument_t) -> cef_string_userfree_t,
     pub get_complete_url: unsafe extern "system" fn(
         self_: *mut _cef_domdocument_t,
         partialURL: *const cef_string_t,
@@ -1311,15 +1359,21 @@ pub struct _cef_domnode_t {
         self_: *mut _cef_domnode_t,
         value: *const cef_string_t,
     ) -> ::std::os::raw::c_int,
-    pub get_as_markup: unsafe extern "system" fn(self_: *mut _cef_domnode_t) -> cef_string_userfree_t,
-    pub get_document: unsafe extern "system" fn(self_: *mut _cef_domnode_t) -> *mut _cef_domdocument_t,
+    pub get_as_markup:
+        unsafe extern "system" fn(self_: *mut _cef_domnode_t) -> cef_string_userfree_t,
+    pub get_document:
+        unsafe extern "system" fn(self_: *mut _cef_domnode_t) -> *mut _cef_domdocument_t,
     pub get_parent: unsafe extern "system" fn(self_: *mut _cef_domnode_t) -> *mut _cef_domnode_t,
     pub get_previous_sibling:
         unsafe extern "system" fn(self_: *mut _cef_domnode_t) -> *mut _cef_domnode_t,
-    pub get_next_sibling: unsafe extern "system" fn(self_: *mut _cef_domnode_t) -> *mut _cef_domnode_t,
-    pub has_children: unsafe extern "system" fn(self_: *mut _cef_domnode_t) -> ::std::os::raw::c_int,
-    pub get_first_child: unsafe extern "system" fn(self_: *mut _cef_domnode_t) -> *mut _cef_domnode_t,
-    pub get_last_child: unsafe extern "system" fn(self_: *mut _cef_domnode_t) -> *mut _cef_domnode_t,
+    pub get_next_sibling:
+        unsafe extern "system" fn(self_: *mut _cef_domnode_t) -> *mut _cef_domnode_t,
+    pub has_children:
+        unsafe extern "system" fn(self_: *mut _cef_domnode_t) -> ::std::os::raw::c_int,
+    pub get_first_child:
+        unsafe extern "system" fn(self_: *mut _cef_domnode_t) -> *mut _cef_domnode_t,
+    pub get_last_child:
+        unsafe extern "system" fn(self_: *mut _cef_domnode_t) -> *mut _cef_domnode_t,
     pub get_element_tag_name:
         unsafe extern "system" fn(self_: *mut _cef_domnode_t) -> cef_string_userfree_t,
     pub has_element_attributes:
@@ -1346,19 +1400,23 @@ pub struct _cef_domnode_t {
 #[repr(C)]
 pub struct _cef_process_message_t {
     pub base: cef_base_ref_counted_t,
-    pub is_valid: unsafe extern "system" fn(self_: *mut _cef_process_message_t) -> ::std::os::raw::c_int,
+    pub is_valid:
+        unsafe extern "system" fn(self_: *mut _cef_process_message_t) -> ::std::os::raw::c_int,
     pub is_read_only:
         unsafe extern "system" fn(self_: *mut _cef_process_message_t) -> ::std::os::raw::c_int,
-    pub copy:
-        unsafe extern "system" fn(self_: *mut _cef_process_message_t) -> *mut _cef_process_message_t,
-    pub get_name: unsafe extern "system" fn(self_: *mut _cef_process_message_t) -> cef_string_userfree_t,
+    pub copy: unsafe extern "system" fn(
+        self_: *mut _cef_process_message_t,
+    ) -> *mut _cef_process_message_t,
+    pub get_name:
+        unsafe extern "system" fn(self_: *mut _cef_process_message_t) -> cef_string_userfree_t,
     pub get_argument_list:
         unsafe extern "system" fn(self_: *mut _cef_process_message_t) -> *mut _cef_list_value_t,
 }
 #[repr(C)]
 pub struct _cef_string_visitor_t {
     pub base: cef_base_ref_counted_t,
-    pub visit: unsafe extern "system" fn(self_: *mut _cef_string_visitor_t, string: *const cef_string_t),
+    pub visit:
+        unsafe extern "system" fn(self_: *mut _cef_string_visitor_t, string: *const cef_string_t),
 }
 #[repr(C)]
 pub struct _cef_v8context_t {
@@ -1380,7 +1438,8 @@ pub struct _cef_frame_t {
         unsafe extern "system" fn(self_: *mut _cef_frame_t, visitor: *mut _cef_string_visitor_t),
     pub get_text:
         unsafe extern "system" fn(self_: *mut _cef_frame_t, visitor: *mut _cef_string_visitor_t),
-    pub load_request: unsafe extern "system" fn(self_: *mut _cef_frame_t, request: *mut _cef_request_t),
+    pub load_request:
+        unsafe extern "system" fn(self_: *mut _cef_frame_t, request: *mut _cef_request_t),
     pub load_url: unsafe extern "system" fn(self_: *mut _cef_frame_t, url: *const cef_string_t),
     pub execute_java_script: unsafe extern "system" fn(
         self_: *mut _cef_frame_t,
@@ -1396,7 +1455,8 @@ pub struct _cef_frame_t {
     pub get_url: unsafe extern "system" fn(self_: *mut _cef_frame_t) -> cef_string_userfree_t,
     pub get_browser: unsafe extern "system" fn(self_: *mut _cef_frame_t) -> *mut _cef_browser_t,
     pub get_v8context: unsafe extern "system" fn(self_: *mut _cef_frame_t) -> *mut _cef_v8context_t,
-    pub visit_dom: unsafe extern "system" fn(self_: *mut _cef_frame_t, visitor: *mut _cef_domvisitor_t),
+    pub visit_dom:
+        unsafe extern "system" fn(self_: *mut _cef_frame_t, visitor: *mut _cef_domvisitor_t),
     pub create_urlrequest: unsafe extern "system" fn(
         self_: *mut _cef_frame_t,
         request: *mut _cef_request_t,
@@ -1421,31 +1481,40 @@ pub struct _cef_x509cert_principal_t {
         unsafe extern "system" fn(self_: *mut _cef_x509cert_principal_t) -> cef_string_userfree_t,
     pub get_country_name:
         unsafe extern "system" fn(self_: *mut _cef_x509cert_principal_t) -> cef_string_userfree_t,
-    pub get_street_addresses:
-        unsafe extern "system" fn(self_: *mut _cef_x509cert_principal_t, addresses: cef_string_list_t),
+    pub get_street_addresses: unsafe extern "system" fn(
+        self_: *mut _cef_x509cert_principal_t,
+        addresses: cef_string_list_t,
+    ),
     pub get_organization_names:
         unsafe extern "system" fn(self_: *mut _cef_x509cert_principal_t, names: cef_string_list_t),
     pub get_organization_unit_names:
         unsafe extern "system" fn(self_: *mut _cef_x509cert_principal_t, names: cef_string_list_t),
-    pub get_domain_components:
-        unsafe extern "system" fn(self_: *mut _cef_x509cert_principal_t, components: cef_string_list_t),
+    pub get_domain_components: unsafe extern "system" fn(
+        self_: *mut _cef_x509cert_principal_t,
+        components: cef_string_list_t,
+    ),
 }
 #[repr(C)]
 pub struct _cef_x509certificate_t {
     pub base: cef_base_ref_counted_t,
-    pub get_subject:
-        unsafe extern "system" fn(self_: *mut _cef_x509certificate_t) -> *mut _cef_x509cert_principal_t,
-    pub get_issuer:
-        unsafe extern "system" fn(self_: *mut _cef_x509certificate_t) -> *mut _cef_x509cert_principal_t,
+    pub get_subject: unsafe extern "system" fn(
+        self_: *mut _cef_x509certificate_t,
+    ) -> *mut _cef_x509cert_principal_t,
+    pub get_issuer: unsafe extern "system" fn(
+        self_: *mut _cef_x509certificate_t,
+    ) -> *mut _cef_x509cert_principal_t,
     pub get_serial_number:
         unsafe extern "system" fn(self_: *mut _cef_x509certificate_t) -> *mut _cef_binary_value_t,
-    pub get_valid_start: unsafe extern "system" fn(self_: *mut _cef_x509certificate_t) -> cef_time_t,
-    pub get_valid_expiry: unsafe extern "system" fn(self_: *mut _cef_x509certificate_t) -> cef_time_t,
+    pub get_valid_start:
+        unsafe extern "system" fn(self_: *mut _cef_x509certificate_t) -> cef_time_t,
+    pub get_valid_expiry:
+        unsafe extern "system" fn(self_: *mut _cef_x509certificate_t) -> cef_time_t,
     pub get_derencoded:
         unsafe extern "system" fn(self_: *mut _cef_x509certificate_t) -> *mut _cef_binary_value_t,
     pub get_pemencoded:
         unsafe extern "system" fn(self_: *mut _cef_x509certificate_t) -> *mut _cef_binary_value_t,
-    pub get_issuer_chain_size: unsafe extern "system" fn(self_: *mut _cef_x509certificate_t) -> size_t,
+    pub get_issuer_chain_size:
+        unsafe extern "system" fn(self_: *mut _cef_x509certificate_t) -> size_t,
     pub get_derencoded_issuer_chain: unsafe extern "system" fn(
         self_: *mut _cef_x509certificate_t,
         chainCount: *mut size_t,
@@ -1462,8 +1531,10 @@ pub struct _cef_sslstatus_t {
     pub base: cef_base_ref_counted_t,
     pub is_secure_connection:
         unsafe extern "system" fn(self_: *mut _cef_sslstatus_t) -> ::std::os::raw::c_int,
-    pub get_cert_status: unsafe extern "system" fn(self_: *mut _cef_sslstatus_t) -> cef_cert_status_t,
-    pub get_sslversion: unsafe extern "system" fn(self_: *mut _cef_sslstatus_t) -> cef_ssl_version_t,
+    pub get_cert_status:
+        unsafe extern "system" fn(self_: *mut _cef_sslstatus_t) -> cef_cert_status_t,
+    pub get_sslversion:
+        unsafe extern "system" fn(self_: *mut _cef_sslstatus_t) -> cef_ssl_version_t,
     pub get_content_status:
         unsafe extern "system" fn(self_: *mut _cef_sslstatus_t) -> cef_ssl_content_status_t,
     pub get_x509certificate:
@@ -1474,7 +1545,8 @@ pub struct _cef_navigation_entry_t {
     pub base: cef_base_ref_counted_t,
     pub is_valid:
         unsafe extern "system" fn(self_: *mut _cef_navigation_entry_t) -> ::std::os::raw::c_int,
-    pub get_url: unsafe extern "system" fn(self_: *mut _cef_navigation_entry_t) -> cef_string_userfree_t,
+    pub get_url:
+        unsafe extern "system" fn(self_: *mut _cef_navigation_entry_t) -> cef_string_userfree_t,
     pub get_display_url:
         unsafe extern "system" fn(self_: *mut _cef_navigation_entry_t) -> cef_string_userfree_t,
     pub get_original_url:
@@ -1502,23 +1574,29 @@ pub struct _cef_browser_t {
     pub get_host: unsafe extern "system" fn(self_: *mut _cef_browser_t) -> *mut _cef_browser_host_t,
     pub can_go_back: unsafe extern "system" fn(self_: *mut _cef_browser_t) -> ::std::os::raw::c_int,
     pub go_back: unsafe extern "system" fn(self_: *mut _cef_browser_t),
-    pub can_go_forward: unsafe extern "system" fn(self_: *mut _cef_browser_t) -> ::std::os::raw::c_int,
+    pub can_go_forward:
+        unsafe extern "system" fn(self_: *mut _cef_browser_t) -> ::std::os::raw::c_int,
     pub go_forward: unsafe extern "system" fn(self_: *mut _cef_browser_t),
     pub is_loading: unsafe extern "system" fn(self_: *mut _cef_browser_t) -> ::std::os::raw::c_int,
     pub reload: unsafe extern "system" fn(self_: *mut _cef_browser_t),
     pub reload_ignore_cache: unsafe extern "system" fn(self_: *mut _cef_browser_t),
     pub stop_load: unsafe extern "system" fn(self_: *mut _cef_browser_t),
-    pub get_identifier: unsafe extern "system" fn(self_: *mut _cef_browser_t) -> ::std::os::raw::c_int,
+    pub get_identifier:
+        unsafe extern "system" fn(self_: *mut _cef_browser_t) -> ::std::os::raw::c_int,
     pub is_same: unsafe extern "system" fn(
         self_: *mut _cef_browser_t,
         that: *mut _cef_browser_t,
     ) -> ::std::os::raw::c_int,
     pub is_popup: unsafe extern "system" fn(self_: *mut _cef_browser_t) -> ::std::os::raw::c_int,
-    pub has_document: unsafe extern "system" fn(self_: *mut _cef_browser_t) -> ::std::os::raw::c_int,
+    pub has_document:
+        unsafe extern "system" fn(self_: *mut _cef_browser_t) -> ::std::os::raw::c_int,
     pub get_main_frame: unsafe extern "system" fn(self_: *mut _cef_browser_t) -> *mut _cef_frame_t,
-    pub get_focused_frame: unsafe extern "system" fn(self_: *mut _cef_browser_t) -> *mut _cef_frame_t,
-    pub get_frame_byident:
-        unsafe extern "system" fn(self_: *mut _cef_browser_t, identifier: int64) -> *mut _cef_frame_t,
+    pub get_focused_frame:
+        unsafe extern "system" fn(self_: *mut _cef_browser_t) -> *mut _cef_frame_t,
+    pub get_frame_byident: unsafe extern "system" fn(
+        self_: *mut _cef_browser_t,
+        identifier: int64,
+    ) -> *mut _cef_frame_t,
     pub get_frame: unsafe extern "system" fn(
         self_: *mut _cef_browser_t,
         name: *const cef_string_t,
@@ -1529,7 +1607,8 @@ pub struct _cef_browser_t {
         identifiersCount: *mut size_t,
         identifiers: *mut int64,
     ),
-    pub get_frame_names: unsafe extern "system" fn(self_: *mut _cef_browser_t, names: cef_string_list_t),
+    pub get_frame_names:
+        unsafe extern "system" fn(self_: *mut _cef_browser_t, names: cef_string_list_t),
 }
 #[repr(C)]
 pub struct _cef_run_file_dialog_callback_t {
@@ -1573,9 +1652,12 @@ pub struct _cef_download_image_callback_t {
 #[repr(C)]
 pub struct _cef_browser_host_t {
     pub base: cef_base_ref_counted_t,
-    pub get_browser: unsafe extern "system" fn(self_: *mut _cef_browser_host_t) -> *mut _cef_browser_t,
-    pub close_browser:
-        unsafe extern "system" fn(self_: *mut _cef_browser_host_t, force_close: ::std::os::raw::c_int),
+    pub get_browser:
+        unsafe extern "system" fn(self_: *mut _cef_browser_host_t) -> *mut _cef_browser_t,
+    pub close_browser: unsafe extern "system" fn(
+        self_: *mut _cef_browser_host_t,
+        force_close: ::std::os::raw::c_int,
+    ),
     pub try_close_browser:
         unsafe extern "system" fn(self_: *mut _cef_browser_host_t) -> ::std::os::raw::c_int,
     pub set_focus:
@@ -1584,8 +1666,10 @@ pub struct _cef_browser_host_t {
         unsafe extern "system" fn(self_: *mut _cef_browser_host_t) -> ::std::os::raw::c_ulong,
     pub get_opener_window_handle:
         unsafe extern "system" fn(self_: *mut _cef_browser_host_t) -> ::std::os::raw::c_ulong,
-    pub has_view: unsafe extern "system" fn(self_: *mut _cef_browser_host_t) -> ::std::os::raw::c_int,
-    pub get_client: unsafe extern "system" fn(self_: *mut _cef_browser_host_t) -> *mut _cef_client_t,
+    pub has_view:
+        unsafe extern "system" fn(self_: *mut _cef_browser_host_t) -> ::std::os::raw::c_int,
+    pub get_client:
+        unsafe extern "system" fn(self_: *mut _cef_browser_host_t) -> *mut _cef_client_t,
     pub get_request_context:
         unsafe extern "system" fn(self_: *mut _cef_browser_host_t) -> *mut _cef_request_context_t,
     pub get_zoom_level: unsafe extern "system" fn(self_: *mut _cef_browser_host_t) -> f64,
@@ -1680,16 +1764,20 @@ pub struct _cef_browser_host_t {
         deltaX: ::std::os::raw::c_int,
         deltaY: ::std::os::raw::c_int,
     ),
-    pub send_touch_event:
-        unsafe extern "system" fn(self_: *mut _cef_browser_host_t, event: *const _cef_touch_event_t),
+    pub send_touch_event: unsafe extern "system" fn(
+        self_: *mut _cef_browser_host_t,
+        event: *const _cef_touch_event_t,
+    ),
     pub send_focus_event:
         unsafe extern "system" fn(self_: *mut _cef_browser_host_t, setFocus: ::std::os::raw::c_int),
     pub send_capture_lost_event: unsafe extern "system" fn(self_: *mut _cef_browser_host_t),
     pub notify_move_or_resize_started: unsafe extern "system" fn(self_: *mut _cef_browser_host_t),
     pub get_windowless_frame_rate:
         unsafe extern "system" fn(self_: *mut _cef_browser_host_t) -> ::std::os::raw::c_int,
-    pub set_windowless_frame_rate:
-        unsafe extern "system" fn(self_: *mut _cef_browser_host_t, frame_rate: ::std::os::raw::c_int),
+    pub set_windowless_frame_rate: unsafe extern "system" fn(
+        self_: *mut _cef_browser_host_t,
+        frame_rate: ::std::os::raw::c_int,
+    ),
     pub ime_set_composition: unsafe extern "system" fn(
         self_: *mut _cef_browser_host_t,
         text: *const cef_string_t,
@@ -1721,8 +1809,10 @@ pub struct _cef_browser_host_t {
         allowed_ops: cef_drag_operations_mask_t,
     ),
     pub drag_target_drag_leave: unsafe extern "system" fn(self_: *mut _cef_browser_host_t),
-    pub drag_target_drop:
-        unsafe extern "system" fn(self_: *mut _cef_browser_host_t, event: *const _cef_mouse_event_t),
+    pub drag_target_drop: unsafe extern "system" fn(
+        self_: *mut _cef_browser_host_t,
+        event: *const _cef_mouse_event_t,
+    ),
     pub drag_source_ended_at: unsafe extern "system" fn(
         self_: *mut _cef_browser_host_t,
         x: ::std::os::raw::c_int,
@@ -1732,8 +1822,10 @@ pub struct _cef_browser_host_t {
     pub drag_source_system_drag_ended: unsafe extern "system" fn(self_: *mut _cef_browser_host_t),
     pub get_visible_navigation_entry:
         unsafe extern "system" fn(self_: *mut _cef_browser_host_t) -> *mut _cef_navigation_entry_t,
-    pub set_accessibility_state:
-        unsafe extern "system" fn(self_: *mut _cef_browser_host_t, accessibility_state: cef_state_t),
+    pub set_accessibility_state: unsafe extern "system" fn(
+        self_: *mut _cef_browser_host_t,
+        accessibility_state: cef_state_t,
+    ),
     pub set_auto_resize_enabled: unsafe extern "system" fn(
         self_: *mut _cef_browser_host_t,
         enabled: ::std::os::raw::c_int,
@@ -1927,19 +2019,23 @@ pub struct _cef_request_context_t {
 #[repr(C)]
 pub struct _cef_response_t {
     pub base: cef_base_ref_counted_t,
-    pub is_read_only: unsafe extern "system" fn(self_: *mut _cef_response_t) -> ::std::os::raw::c_int,
+    pub is_read_only:
+        unsafe extern "system" fn(self_: *mut _cef_response_t) -> ::std::os::raw::c_int,
     pub get_error: unsafe extern "system" fn(self_: *mut _cef_response_t) -> cef_errorcode_t,
     pub set_error: unsafe extern "system" fn(self_: *mut _cef_response_t, error: cef_errorcode_t),
     pub get_status: unsafe extern "system" fn(self_: *mut _cef_response_t) -> ::std::os::raw::c_int,
     pub set_status:
         unsafe extern "system" fn(self_: *mut _cef_response_t, status: ::std::os::raw::c_int),
-    pub get_status_text: unsafe extern "system" fn(self_: *mut _cef_response_t) -> cef_string_userfree_t,
+    pub get_status_text:
+        unsafe extern "system" fn(self_: *mut _cef_response_t) -> cef_string_userfree_t,
     pub set_status_text:
         unsafe extern "system" fn(self_: *mut _cef_response_t, statusText: *const cef_string_t),
-    pub get_mime_type: unsafe extern "system" fn(self_: *mut _cef_response_t) -> cef_string_userfree_t,
+    pub get_mime_type:
+        unsafe extern "system" fn(self_: *mut _cef_response_t) -> cef_string_userfree_t,
     pub set_mime_type:
         unsafe extern "system" fn(self_: *mut _cef_response_t, mimeType: *const cef_string_t),
-    pub get_charset: unsafe extern "system" fn(self_: *mut _cef_response_t) -> cef_string_userfree_t,
+    pub get_charset:
+        unsafe extern "system" fn(self_: *mut _cef_response_t) -> cef_string_userfree_t,
     pub set_charset:
         unsafe extern "system" fn(self_: *mut _cef_response_t, charset: *const cef_string_t),
     pub get_header_by_name: unsafe extern "system" fn(
@@ -1962,13 +2058,16 @@ pub struct _cef_response_t {
 #[repr(C)]
 pub struct _cef_urlrequest_t {
     pub base: cef_base_ref_counted_t,
-    pub get_request: unsafe extern "system" fn(self_: *mut _cef_urlrequest_t) -> *mut _cef_request_t,
+    pub get_request:
+        unsafe extern "system" fn(self_: *mut _cef_urlrequest_t) -> *mut _cef_request_t,
     pub get_client:
         unsafe extern "system" fn(self_: *mut _cef_urlrequest_t) -> *mut _cef_urlrequest_client_t,
     pub get_request_status:
         unsafe extern "system" fn(self_: *mut _cef_urlrequest_t) -> cef_urlrequest_status_t,
-    pub get_request_error: unsafe extern "system" fn(self_: *mut _cef_urlrequest_t) -> cef_errorcode_t,
-    pub get_response: unsafe extern "system" fn(self_: *mut _cef_urlrequest_t) -> *mut _cef_response_t,
+    pub get_request_error:
+        unsafe extern "system" fn(self_: *mut _cef_urlrequest_t) -> cef_errorcode_t,
+    pub get_response:
+        unsafe extern "system" fn(self_: *mut _cef_urlrequest_t) -> *mut _cef_response_t,
     pub response_was_cached:
         unsafe extern "system" fn(self_: *mut _cef_urlrequest_t) -> ::std::os::raw::c_int,
     pub cancel: unsafe extern "system" fn(self_: *mut _cef_urlrequest_t),
@@ -1984,8 +2083,10 @@ pub type cef_urlrequest_t = _cef_urlrequest_t;
 #[repr(C)]
 pub struct _cef_urlrequest_client_t {
     pub base: cef_base_ref_counted_t,
-    pub on_request_complete:
-        unsafe extern "system" fn(self_: *mut _cef_urlrequest_client_t, request: *mut _cef_urlrequest_t),
+    pub on_request_complete: unsafe extern "system" fn(
+        self_: *mut _cef_urlrequest_client_t,
+        request: *mut _cef_urlrequest_t,
+    ),
     pub on_upload_progress: unsafe extern "system" fn(
         self_: *mut _cef_urlrequest_client_t,
         request: *mut _cef_urlrequest_t,

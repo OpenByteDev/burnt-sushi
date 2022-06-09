@@ -109,7 +109,9 @@ async fn run_rpc(
 
                 tokio::task::spawn_local(Box::pin(rpc_system.map(|_| ())));
             },
-            _ = disconnect_signal.changed() => { return Ok(()); }
+            _ = disconnect_signal.changed() => {
+                return Ok(());
+            }
         }
     }
 }
