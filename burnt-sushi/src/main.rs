@@ -17,13 +17,13 @@ use std::{
     path::{Path, PathBuf},
 };
 
-use clap::{Parser, ArgEnum};
+use clap::{ArgEnum, Parser};
 use dll_syringe::{
     error::SyringeError,
     process::{OwnedProcessModule, Process},
     Syringe,
 };
-use log::{error, info, trace, warn, debug};
+use log::{debug, error, info, warn};
 use serde::Deserialize;
 use spotify_process_scanner::{SpotifyInfo, SpotifyProcessScanner};
 use tokio::{runtime, task::LocalSet};
@@ -106,7 +106,7 @@ async fn main() {
         LogLevel::Debug => log::LevelFilter::Debug,
         LogLevel::Info => log::LevelFilter::Info,
         LogLevel::Warn => log::LevelFilter::Warn,
-        LogLevel::Error => log::LevelFilter::Error
+        LogLevel::Error => log::LevelFilter::Error,
     };
     log::set_max_level(log_level);
 
@@ -236,14 +236,14 @@ impl AppState {
         {
             warn!("Found previously injected blocker");
 
-            trace!("Stopping RPC of previous blocker");
+            debug!("Stopping RPC of previous blocker");
             let stop_rpc =
                 unsafe { syringe.get_payload_procedure::<fn()>(prev_payload, "stop_rpc") }
                     .unwrap()
                     .unwrap();
             match stop_rpc.call() {
                 Ok(_) => {
-                    trace!("Stopped RPC of previous blocker");
+                    debug!("Stopped RPC of previous blocker");
                 }
                 Err(e) => {
                     error!("Failed to stop RPC of previous blocker: {}", e);
@@ -265,7 +265,7 @@ impl AppState {
         info!("Injecting blocker...");
         let payload = syringe.inject(payload_path).unwrap();
 
-        trace!("Starting RPC...");
+        debug!("Starting RPC...");
         let start_rpc =
             unsafe { syringe.get_payload_procedure::<fn() -> SocketAddrV4>(payload, "start_rpc") }
                 .unwrap()
@@ -309,10 +309,10 @@ impl AppState {
             }?
             .unwrap();
 
-            trace!("Stopping RPC...");
+            debug!("Stopping RPC...");
             stop_rpc.call()?;
             state.rpc_task.join().await.unwrap();
-            trace!("Stopped RPC");
+            debug!("Stopped RPC");
 
             if state.payload.process().is_alive() {
                 info!("Ejecting blocker...");
@@ -343,19 +343,19 @@ impl AppState {
             let payload_bytes =
                 include_bytes!(concat!(env!("OUT_DIR"), "\\BurntSushiBlocker_x86.dll"));
 
-            trace!("Looking for blocker at '{}'", path.display());
+            debug!("Looking for blocker at '{}'", path.display());
             if let Ok(metadata) = tokio::fs::metadata(path).await {
                 if metadata.is_file() {
-                    trace!("Found blocker at '{}'", path.display());
+                    debug!("Found blocker at '{}'", path.display());
                     if check_len && metadata.len() != payload_bytes.len() as u64 {
-                        trace!("Blocker at '{}' is incorrect size.", path.display());
+                        debug!("Blocker at '{}' is incorrect size.", path.display());
                     } else {
                         return Ok(());
                     }
                 }
             }
             if write_if_absent {
-                trace!("Writing blocker to '{}'", path.display());
+                debug!("Writing blocker to '{}'", path.display());
                 tokio::fs::create_dir_all(path.parent().unwrap()).await?;
                 tokio::fs::write(&path, payload_bytes).await?;
                 Ok(())
@@ -367,16 +367,16 @@ impl AppState {
             }
         }
 
-        trace!("Looking for blocker according to cli args...");
+        debug!("Looking for blocker according to cli args...");
         if let Some(config_path) = &ARGS.blocker {
             if try_load_blocker(config_path, false, true).await.is_ok() {
                 return Ok(config_path.to_path_buf());
             } else {
-                trace!("Looking for blocker according to cli args...");
+                debug!("Looking for blocker according to cli args...");
             }
         }
 
-        trace!("Looking for blocker next to executable...");
+        debug!("Looking for blocker next to executable...");
         if let Some(sibling_path) = env::current_exe()
             .ok()
             .and_then(|p| p.parent().map(|p| p.join(DEFAULT_BLOCKER_FILE_NAME)))
@@ -386,7 +386,7 @@ impl AppState {
             }
         }
 
-        trace!("Looking for existing blocker in temporary directory...");
+        debug!("Looking for existing blocker in temporary directory...");
         if let Some(temp_path) = env::temp_dir().parent().map(|p| {
             p.join(APP_AUTHOR)
                 .join(APP_NAME_WITH_VERSION)
@@ -412,12 +412,12 @@ impl AppState {
             let default_filter_bytes = include_str!(concat!(env!("OUT_DIR"), "\\filter.toml"));
 
             if let Some(path) = path {
-                trace!("Looking for filter config at '{}'", path.display());
+                debug!("Looking for filter config at '{}'", path.display());
                 if let Ok(filters) = tokio::fs::read_to_string(path).await {
-                    trace!("Found filter config at '{}'", path.display());
+                    debug!("Found filter config at '{}'", path.display());
                     try_load_filter_config_from_str(&filters)
                 } else if write_if_absent {
-                    trace!("Writing default filter config to '{}'", path.display());
+                    debug!("Writing default filter config to '{}'", path.display());
                     tokio::fs::create_dir_all(path.parent().unwrap()).await?;
                     tokio::fs::write(&path, default_filter_bytes).await?;
                     try_load_filter_config_from_str(default_filter_bytes)
@@ -428,7 +428,7 @@ impl AppState {
                     ))
                 }
             } else {
-                trace!("Loading default filter config...");
+                debug!("Loading default filter config...");
                 try_load_filter_config_from_str(default_filter_bytes)
             }
         }
@@ -446,14 +446,14 @@ impl AppState {
             }
         }
 
-        trace!("Looking for filter config according to cli args...");
+        debug!("Looking for filter config according to cli args...");
         if let Some(config_path) = &ARGS.filters {
             if let Ok(filters) = try_load_filter_config_from_path(Some(config_path), true).await {
                 return Ok(filters);
             }
         }
 
-        trace!("Looking for filter config next to executable...");
+        debug!("Looking for filter config next to executable...");
         if let Some(sibling_path) = env::current_exe()
             .ok()
             .and_then(|p| p.parent().map(|p| p.join(DEFAULT_FILTER_FILE_NAME)))

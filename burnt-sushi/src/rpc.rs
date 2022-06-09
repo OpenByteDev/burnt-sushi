@@ -1,7 +1,7 @@
 use ::capnp::capability::Promise;
 use capnp_rpc::{pry, rpc_twoparty_capnp, twoparty, RpcSystem};
 use futures::{AsyncReadExt, FutureExt};
-use log::{info, trace};
+use log::{debug, info};
 use tokio::net::ToSocketAddrs;
 
 use crate::FilterConfig;
@@ -20,7 +20,7 @@ impl shared::rpc::blocker_service::logger::Server for LoggerImpl {
         let hook_name = pry!(request.get_hook());
         let url = pry!(request.get_url());
 
-        trace!("[{}] ({}) {}", block_sign, hook_name, url);
+        debug!("[{}] ({}) {}", block_sign, hook_name, url);
 
         Promise::ok(())
     }
