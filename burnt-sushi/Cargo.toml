@@ -16,7 +16,7 @@ capnp-rpc = { version = "0.14", default-features = false }
 toml = { version = "0.5", default-features = false }
 serde = { version = "1.0", features = ["derive"], default-features = false }
 futures = { version = "0.3", default-features = false }
-tokio = { version = "1.18", features = ["net", "rt", "macros", "fs"], default-features = false }
+tokio = { version = "1.19", features = ["net", "rt", "macros", "fs"], default-features = false }
 tokio-util = { version = "0.7", features = ["compat"], default-features = false }
 winapi = { version = "0.3", features = ["winuser", "tlhelp32"], default-features = false }
 wineventhook = { version = "0.2", default-features = false }
