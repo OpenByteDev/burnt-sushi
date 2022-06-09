@@ -17,13 +17,13 @@ use std::{
     path::{Path, PathBuf},
 };
 
-use clap::Parser;
+use clap::{Parser, ArgEnum};
 use dll_syringe::{
     error::SyringeError,
     process::{OwnedProcessModule, Process},
     Syringe,
 };
-use log::{error, info, trace, warn};
+use log::{error, info, trace, warn, debug};
 use serde::Deserialize;
 use spotify_process_scanner::{SpotifyInfo, SpotifyProcessScanner};
 use tokio::{runtime, task::LocalSet};
@@ -57,6 +57,10 @@ struct Args {
     #[clap(long)]
     console: bool,
 
+    /// Level of debug output.
+    #[clap(long, arg_enum)]
+    log_level: Option<LogLevel>,
+
     /// Start a new instance of this app even if one is already running.
     #[clap(long)]
     ignore_singleton: bool,
@@ -74,6 +78,16 @@ struct Args {
     filters: Option<PathBuf>,
 }
 
+#[derive(ArgEnum, Clone, Copy, Debug)]
+enum LogLevel {
+    Off,
+    Trace,
+    Debug,
+    Info,
+    Warn,
+    Error,
+}
+
 #[tokio::main(flavor = "current_thread")]
 async fn main() {
     if ARGS.console {
@@ -85,6 +99,16 @@ async fn main() {
     } else {
         console::global::set(Console::none());
     }
+
+    let log_level = match ARGS.log_level.unwrap_or(LogLevel::Info) {
+        LogLevel::Off => log::LevelFilter::Off,
+        LogLevel::Trace => log::LevelFilter::Trace,
+        LogLevel::Debug => log::LevelFilter::Debug,
+        LogLevel::Info => log::LevelFilter::Info,
+        LogLevel::Warn => log::LevelFilter::Warn,
+        LogLevel::Error => log::LevelFilter::Error
+    };
+    log::set_max_level(log_level);
 
     info!("{}", APP_NAME_WITH_VERSION);
 
@@ -107,9 +131,15 @@ async fn run() {
 
     let mut app = App::new();
     tokio::select! {
-        _ = app.run() => {}
-        _ = wait_for_ctrl_c() => {}
-        _ = system_tray.wait_for_exit() => {}
+        _ = app.run() => {
+            unreachable!("App should never exit on its own");
+        }
+        _ = wait_for_ctrl_c() => {
+            debug!("Ctrl-C received");
+        }
+        _ = system_tray.wait_for_exit() => {
+            debug!("System tray exited");
+        }
     }
 
     info!("Shutting down...");
@@ -162,7 +192,9 @@ impl App {
 
     async fn run(&mut self) {
         tokio::select! {
-            _ = self.scanner.run() => {}
+            _ = self.scanner.run() => {
+                unreachable!("Spotify scanner should never stop on its own");
+            }
             _ = async {
                 info!("Looking for Spotify...");
                 while self.spotify_state.changed().await.is_ok() {
