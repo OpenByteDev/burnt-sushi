@@ -100,7 +100,7 @@ async fn main() {
         console::global::set(Console::none());
     }
 
-    let log_level = match ARGS.log_level.unwrap_or(LogLevel::Info) {
+    let log_level = match ARGS.log_level.unwrap_or(LogLevel::Debug) {
         LogLevel::Off => log::LevelFilter::Off,
         LogLevel::Trace => log::LevelFilter::Trace,
         LogLevel::Debug => log::LevelFilter::Debug,
