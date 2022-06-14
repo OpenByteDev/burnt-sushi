@@ -4,7 +4,7 @@ use futures::{AsyncReadExt, FutureExt};
 use log::{debug, info};
 use tokio::net::ToSocketAddrs;
 
-use crate::FilterConfig;
+use crate::blocker::FilterConfig;
 
 struct LoggerImpl;
 
