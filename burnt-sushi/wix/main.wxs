@@ -35,14 +35,15 @@
   cause installation errors.
 -->
 <?if $(sys.BUILDARCH) = x64 or $(sys.BUILDARCH) = arm64?>
-<?define PlatformProgramFilesFolder = "ProgramFiles64Folder"?>
+    <?define PlatformProgramFilesFolder = "ProgramFiles64Folder"?>
 <?else ?>
-<?define PlatformProgramFilesFolder = "ProgramFilesFolder"?>
+    <?define PlatformProgramFilesFolder = "ProgramFilesFolder"?>
 <?endif ?>
 <Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
     <Product Id="*" Name="BurntSushi" UpgradeCode="31d49aef-51d9-4e4e-ac9e-bb0ebfdebca1" Manufacturer="OpenByte" Language="1033" Codepage="1252" Version="$(var.Version)">
-        <Package Id="*" Keywords="Installer" Description="Spotify AdBlocker for Windows" Manufacturer="OpenByte" InstallerVersion="450" Languages="1033" Compressed="yes" InstallScope="perMachine" SummaryCodepage="1252" InstallPrivileges="elevated" />
+        <Package InstallerVersion="500" Compressed="yes" InstallPrivileges="elevated" />
         <MajorUpgrade AllowDowngrades="no" AllowSameVersionUpgrades="no" DowngradeErrorMessage="A newer version of [ProductName] is already installed. Setup will now exit." />
+        
         <Media Id="1" Cabinet="media1.cab" EmbedCab="yes" DiskPrompt="CD-ROM #1" />
         <Property Id="DiskPrompt" Value="BurntSushi Installation" />
 
@@ -61,6 +62,8 @@
                     <Directory Id="APPLICATIONFOLDER" Name="BurntSushi">
                         <Component Id="Binary" Guid="b71b3041-4057-43bb-8711-6be7a2e2c288">
                             <File Id="Executable" Name="BurntSushi.exe" DiskId="1" Source="$(var.CargoTargetBinDir)\BurntSushi.exe" KeyPath="yes" />
+                            <RemoveFile Id="removeDesktopShortcuts" On="uninstall" Name="*.dll" />
+                            <RemoveFolder Id="LeftOverAppsRemove" On="uninstall" Directory="APPLICATIONFOLDER" />
                         </Component>
                     </Directory>
                 </Directory>
