@@ -1,0 +1,135 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  The "cargo wix" subcommand provides a variety of predefined variables available
+  for customization of this template. The values for each variable are set at
+  installer creation time. The following variables are available:
+
+  TargetTriple      = The rustc target triple name.
+  TargetEnv         = The rustc target environment. This is typically either
+                      "msvc" or "gnu" depending on the toolchain downloaded and
+                      installed.
+  TargetVendor      = The rustc target vendor. This is typically "pc", but Rust
+                      does support other vendors, like "uwp".
+  CargoTargetBinDir = The complete path to the binary (exe). The default would
+                      be "target\release\<BINARY_NAME>.exe" where
+                      "<BINARY_NAME>" is replaced with the name of each binary
+                      target defined in the package's manifest (Cargo.toml). If
+                      a different rustc target triple is used than the host,
+                      i.e. cross-compiling, then the default path would be
+                      "target\<CARGO_TARGET>\<CARGO_PROFILE>\<BINARY_NAME>.exe",
+                      where "<CARGO_TARGET>" is replaced with the "CargoTarget"
+                      variable value and "<CARGO_PROFILE>" is replaced with the
+                      value from the `CargoProfile` variable.
+  CargoTargetDir    = The path to the directory for the build artifacts, i.e.
+                      "target".
+  CargoProfile      = Either "debug" or `release` depending on the build
+                      profile. The default is "release".
+  Version           = The version for the installer. The default is the
+                      "Major.Minor.Fix" semantic versioning number of the Rust
+                      package.
+-->
+<!--
+  Please do not remove these pre-processor If-Else blocks. These are used with
+  the `cargo wix` subcommand to automatically determine the installation
+  destination for 32-bit versus 64-bit installers. Removal of these lines will
+  cause installation errors.
+-->
+<?if $(sys.BUILDARCH) = x64 or $(sys.BUILDARCH) = arm64?>
+<?define PlatformProgramFilesFolder = "ProgramFiles64Folder"?>
+<?else ?>
+<?define PlatformProgramFilesFolder = "ProgramFilesFolder"?>
+<?endif ?>
+<Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
+    <Product Id="*" Name="BurntSushi" UpgradeCode="31d49aef-51d9-4e4e-ac9e-bb0ebfdebca1" Manufacturer="OpenByte" Language="1033" Codepage="1252" Version="$(var.Version)">
+        <Package Id="*" Keywords="Installer" Description="Spotify AdBlocker for Windows" Manufacturer="OpenByte" InstallerVersion="450" Languages="1033" Compressed="yes" InstallScope="perMachine" SummaryCodepage="1252" InstallPrivileges="elevated" />
+        <MajorUpgrade AllowDowngrades="no" AllowSameVersionUpgrades="no" DowngradeErrorMessage="A newer version of [ProductName] is already installed. Setup will now exit." />
+        <Media Id="1" Cabinet="media1.cab" EmbedCab="yes" DiskPrompt="CD-ROM #1" />
+        <Property Id="DiskPrompt" Value="BurntSushi Installation" />
+
+        <Feature Id="ProductFeature" Title="Installer" Level="1">
+            <ComponentGroupRef Id="ProductComponents" />
+        </Feature>
+
+        <ComponentGroup Id="ProductComponents" Directory="APPLICATIONFOLDER">
+            <ComponentRef Id="Binary" />
+            <ComponentRef Id="Autostart" />
+        </ComponentGroup>
+
+        <Directory Id="TARGETDIR" Name="SourceDir">
+            <Directory Id="$(var.PlatformProgramFilesFolder)" Name="PFiles">
+                <Directory Id="ManufacturerFolder" Name="OpenByte">
+                    <Directory Id="APPLICATIONFOLDER" Name="BurntSushi">
+                        <Component Id="Binary" Guid="b71b3041-4057-43bb-8711-6be7a2e2c288">
+                            <File Id="Executable" Name="BurntSushi.exe" DiskId="1" Source="$(var.CargoTargetBinDir)\BurntSushi.exe" KeyPath="yes" />
+                        </Component>
+                    </Directory>
+                </Directory>
+            </Directory>
+        </Directory>
+
+        <Component Id="Autostart" Directory="APPLICATIONFOLDER" Guid="158d9da6-fb49-4ae7-8da7-9f7fefe3f8b9">
+            <RegistryKey Root="HKCU" Key="Software\Microsoft\Windows\CurrentVersion\Run">
+                <RegistryValue Type="string" Name="BurntSushi" Value="&quot;[#Executable]&quot; --autostart" KeyPath="yes" />
+            </RegistryKey>
+        </Component>
+
+        <Property Id="WIXUI_EXITDIALOGOPTIONALCHECKBOXTEXT" Value="Launch BurntSushi" />
+        <Property Id="WixShellExecTarget" Value="[#Executable]" />
+        <CustomAction Id="LaunchApplication" BinaryKey="WixCA" DllEntry="WixShellExec" Impersonate="yes" />
+        <SetProperty Id="ARPINSTALLLOCATION" Value="[APPLICATIONFOLDER]" After="CostFinalize" />
+
+        <CustomAction Id="EXECUTE_AFTER_FINALIZE" Execute="deferred" Impersonate="no" Return="check" FileKey="Executable" ExeCommand="--console --install --log-level trace" />
+        <InstallExecuteSequence>
+            <Custom Action="EXECUTE_AFTER_FINALIZE" Before="InstallFinalize">NOT Installed</Custom>
+        </InstallExecuteSequence>
+
+        <Icon Id="ProductICO" SourceFile="icon.ico" />
+        <Property Id="ARPPRODUCTICON" Value="ProductICO" />
+        <Property Id="ARPHELPLINK" Value="https://github.com/OpenByteDev/burnt-sushi" />
+
+        <Property Id="WIXUI_INSTALLDIR" Value="APPLICATIONFOLDER" />
+        <UI Id="WixUI_InstallDir">
+            <TextStyle Id="WixUI_Font_Normal" FaceName="Tahoma" Size="8" />
+            <TextStyle Id="WixUI_Font_Bigger" FaceName="Tahoma" Size="12" />
+            <TextStyle Id="WixUI_Font_Title" FaceName="Tahoma" Size="9" Bold="yes" />
+            <Property Id="DefaultUIFont" Value="WixUI_Font_Normal" />
+            <Property Id="WixUI_Mode" Value="InstallDir" />
+            <DialogRef Id="BrowseDlg" />
+            <DialogRef Id="DiskCostDlg" />
+            <DialogRef Id="ErrorDlg" />
+            <DialogRef Id="FatalError" />
+            <DialogRef Id="FilesInUse" />
+            <DialogRef Id="MsiRMFilesInUse" />
+            <DialogRef Id="PrepareDlg" />
+            <DialogRef Id="ProgressDlg" />
+            <DialogRef Id="ResumeDlg" />
+            <DialogRef Id="UserExit" />
+            <Publish Dialog="BrowseDlg" Control="OK" Event="DoAction" Value="WixUIValidatePath" Order="3">1</Publish>
+            <Publish Dialog="BrowseDlg" Control="OK" Event="SpawnDialog" Value="InvalidDirDlg" Order="4">
+                <![CDATA[WIXUI_INSTALLDIR_VALID<>"1"]]>
+            </Publish>
+            <Publish Dialog="ExitDialog" Control="Finish" Event="EndDialog" Value="Return" Order="999">1</Publish>
+            <Publish Dialog="ExitDialog" Control="Finish" Event="DoAction" Value="LaunchApplication">WIXUI_EXITDIALOGOPTIONALCHECKBOX = 1 and NOT Installed</Publish>
+            <Publish Dialog="WelcomeDlg" Control="Next" Event="NewDialog" Value="InstallDirDlg">NOT Installed</Publish>
+            <Publish Dialog="WelcomeDlg" Control="Next" Event="NewDialog" Value="VerifyReadyDlg">Installed AND PATCH</Publish>
+            <Publish Dialog="InstallDirDlg" Control="Back" Event="NewDialog" Value="WelcomeDlg">1</Publish>
+            <Publish Dialog="InstallDirDlg" Control="Next" Event="SetTargetPath" Value="[WIXUI_INSTALLDIR]" Order="1">1</Publish>
+            <Publish Dialog="InstallDirDlg" Control="Next" Event="DoAction" Value="WixUIValidatePath" Order="2">NOT WIXUI_DONTVALIDATEPATH</Publish>
+            <Publish Dialog="InstallDirDlg" Control="Next" Event="SpawnDialog" Value="InvalidDirDlg" Order="3">
+                <![CDATA[NOT WIXUI_DONTVALIDATEPATH AND WIXUI_INSTALLDIR_VALID<>"1"]]>
+            </Publish>
+            <Publish Dialog="InstallDirDlg" Control="Next" Event="NewDialog" Value="VerifyReadyDlg" Order="4">WIXUI_DONTVALIDATEPATH OR WIXUI_INSTALLDIR_VALID="1"</Publish>
+            <Publish Dialog="InstallDirDlg" Control="ChangeFolder" Property="_BrowseProperty" Value="[WIXUI_INSTALLDIR]" Order="1">1</Publish>
+            <Publish Dialog="InstallDirDlg" Control="ChangeFolder" Event="SpawnDialog" Value="BrowseDlg" Order="2">1</Publish>
+            <Publish Dialog="VerifyReadyDlg" Control="Back" Event="NewDialog" Value="InstallDirDlg" Order="1">NOT Installed</Publish>
+            <Publish Dialog="VerifyReadyDlg" Control="Back" Event="NewDialog" Value="MaintenanceTypeDlg" Order="2">Installed AND NOT PATCH</Publish>
+            <Publish Dialog="VerifyReadyDlg" Control="Back" Event="NewDialog" Value="WelcomeDlg" Order="2">Installed AND PATCH</Publish>
+            <Publish Dialog="MaintenanceWelcomeDlg" Control="Next" Event="NewDialog" Value="MaintenanceTypeDlg">1</Publish>
+            <Publish Dialog="MaintenanceTypeDlg" Control="RepairButton" Event="NewDialog" Value="VerifyReadyDlg">1</Publish>
+            <Publish Dialog="MaintenanceTypeDlg" Control="RemoveButton" Event="NewDialog" Value="VerifyReadyDlg">1</Publish>
+            <Publish Dialog="MaintenanceTypeDlg" Control="Back" Event="NewDialog" Value="MaintenanceWelcomeDlg">1</Publish>
+            <Property Id="ARPNOMODIFY" Value="1" />
+        </UI>
+        <UIRef Id="WixUI_Common" />
+    </Product>
+</Wix>

@@ -10,7 +10,7 @@
 #![windows_subsystem = "windows"]
 
 use log::{debug, error, info, warn};
-use std::env;
+use std::{env, path::Path};
 
 use crate::{args::ARGS, blocker::SpotifyAdBlocker, console::Console, named_mutex::NamedMutex};
 
@@ -45,6 +45,16 @@ async fn main() {
     log::set_max_level(ARGS.log_level.into_level_filter());
 
     info!("{}", APP_NAME_WITH_VERSION);
+
+    if ARGS.install {
+        if !is_elevated::is_elevated() {
+            error!("Must be run as administrator.");
+            std::process::exit(1);
+        }
+
+        resolver::resolve_blocker(Some(Path::new(&format!(".\\{}", DEFAULT_BLOCKER_FILE_NAME)))).await.unwrap();
+        return;
+    }
 
     if ARGS.ignore_singleton {
         run().await;

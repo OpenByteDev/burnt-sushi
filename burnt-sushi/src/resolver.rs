@@ -6,11 +6,11 @@ use std::{
 use log::{debug, error, warn};
 
 use crate::{
-    args::ARGS, blocker::FilterConfig, APP_AUTHOR, APP_NAME_WITH_VERSION,
+    blocker::{FilterConfig,}, APP_AUTHOR, APP_NAME_WITH_VERSION,
     DEFAULT_BLOCKER_FILE_NAME, DEFAULT_FILTER_FILE_NAME,
 };
 
-pub async fn resolve_blocker() -> io::Result<PathBuf> {
+pub async fn resolve_blocker(provided_path: Option<&Path>) -> io::Result<PathBuf> {
     async fn try_load_blocker(
         path: &Path,
         check_len: bool,
@@ -46,7 +46,7 @@ pub async fn resolve_blocker() -> io::Result<PathBuf> {
     }
 
     debug!("Looking for blocker according to cli args...");
-    if let Some(config_path) = &ARGS.blocker {
+    if let Some(config_path) = provided_path {
         if try_load_blocker(config_path, false, true).await.is_ok() {
             return Ok(config_path.to_path_buf());
         } else {
@@ -82,7 +82,7 @@ pub async fn resolve_blocker() -> io::Result<PathBuf> {
     ))
 }
 
-pub async fn resolve_filter_config() -> io::Result<FilterConfig> {
+pub async fn resolve_filter_config(provided_path: Option<&Path>) -> io::Result<FilterConfig> {
     async fn try_load_filter_config_from_path(
         path: Option<&Path>,
         write_if_absent: bool,
@@ -125,7 +125,7 @@ pub async fn resolve_filter_config() -> io::Result<FilterConfig> {
     }
 
     debug!("Looking for filter config according to cli args...");
-    if let Some(config_path) = &ARGS.filters {
+    if let Some(config_path) = provided_path {
         if let Ok(filters) = try_load_filter_config_from_path(Some(config_path), true).await {
             return Ok(filters);
         }

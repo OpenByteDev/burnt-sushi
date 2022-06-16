@@ -37,6 +37,9 @@ pub struct Args {
     /// If not specified the app will try to find it in the same directory as the app named `filter.toml`.
     #[clap(long)]
     pub filters: Option<PathBuf>,
+
+    #[clap(long, hide = true)]
+    pub install: bool,
 }
 
 #[derive(ArgEnum, Clone, Copy, Debug)]
