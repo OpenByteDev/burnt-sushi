@@ -158,26 +158,7 @@ impl Console {
         match &self.0 {
             ConsoleImpl::None => {}
             ConsoleImpl::Attach | ConsoleImpl::Alloc => println!("{}", s),
-            ConsoleImpl::Piped { pipe, .. } => {
-                writeln!(pipe.lock().unwrap(), "{}", s)?;
-
-                /*
-                let mut bytes_written = MaybeUninit::uninit();
-                let s = format!("{}\n", s);
-                if unsafe {
-                    WriteFile(
-                        pipe.as_raw_handle(),
-                        s.as_ptr().cast(),
-                        s.len() as _,
-                        bytes_written.as_mut_ptr(),
-                        ptr::null_mut(),
-                    )
-                } == FALSE
-                {
-                    return Err(io::Error::last_os_error());
-                }
-                */
-            }
+            ConsoleImpl::Piped { pipe, .. } => writeln!(pipe.lock().unwrap(), "{}", s)?,
         }
         Ok(())
     }

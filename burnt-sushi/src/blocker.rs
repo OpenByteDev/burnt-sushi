@@ -10,10 +10,11 @@ use serde::Deserialize;
 use tokio::{runtime, task::LocalSet};
 
 use crate::{
+    args::ARGS,
     resolver::{resolve_blocker, resolve_filter_config},
     rpc,
     spotify_process_scanner::{SpotifyInfo, SpotifyProcessScanner, SpotifyState},
-    DEFAULT_BLOCKER_FILE_NAME, args::ARGS,
+    DEFAULT_BLOCKER_FILE_NAME,
 };
 
 pub struct SpotifyAdBlocker {
@@ -111,10 +112,14 @@ impl SpotifyHookState {
         }
 
         info!("Loading filter config...");
-        let filter_config = resolve_filter_config(ARGS.filters.as_ref().map(|p| p.as_ref())).await.unwrap();
+        let filter_config = resolve_filter_config(ARGS.filters.as_ref().map(|p| p.as_ref()))
+            .await
+            .unwrap();
 
         info!("Preparing blocker...");
-        let payload_path = resolve_blocker(ARGS.blocker.as_ref().map(|p| p.as_ref())).await.unwrap();
+        let payload_path = resolve_blocker(ARGS.blocker.as_ref().map(|p| p.as_ref()))
+            .await
+            .unwrap();
 
         info!("Injecting blocker...");
         let payload = syringe.inject(payload_path).unwrap();

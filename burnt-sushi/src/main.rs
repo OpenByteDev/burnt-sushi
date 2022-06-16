@@ -1,22 +1,16 @@
-#![feature(
-    io_safety,
-    once_cell,
-    maybe_uninit_uninit_array,
-    maybe_uninit_slice,
-    let_chains
-)]
+#![feature(once_cell, maybe_uninit_uninit_array, maybe_uninit_slice, let_chains)]
 #![warn(unsafe_op_in_unsafe_fn)]
 #![allow(clippy::module_inception, non_snake_case)]
 #![windows_subsystem = "windows"]
 
-use log::{debug, error, info, warn};
-use std::{env, path::Path};
+use log::{debug, error, info, trace, warn};
+use std::env;
 
-use crate::{args::ARGS, blocker::SpotifyAdBlocker, console::Console, named_mutex::NamedMutex};
+use crate::{args::ARGS, blocker::SpotifyAdBlocker, logger::Console, named_mutex::NamedMutex};
 
 mod args;
 mod blocker;
-mod console;
+mod logger;
 mod named_mutex;
 mod resolver;
 mod rpc;
@@ -32,19 +26,27 @@ const DEFAULT_FILTER_FILE_NAME: &str = "filter.toml";
 
 #[tokio::main(flavor = "current_thread")]
 async fn main() {
+    logger::global::init();
+
+    if let Some(console) = Console::attach() {
+        logger::global::get().set_console(console);
+    }
+
     if ARGS.console {
-        console::global::set(
-            Console::attach()
-                .or_else(Console::alloc)
-                .unwrap_or_else(Console::none),
-        );
-    } else {
-        console::global::set(Console::none());
+        if let Some(console) = Console::alloc() {
+            logger::global::get().set_console(console);
+        }
     }
 
     log::set_max_level(ARGS.log_level.into_level_filter());
 
     info!("{}", APP_NAME_WITH_VERSION);
+    trace!(
+        "Running from {}",
+        env::current_exe()
+            .unwrap_or_else(|_| "<unknown>".into())
+            .display()
+    );
 
     if ARGS.install {
         if !is_elevated::is_elevated() {
@@ -52,7 +54,14 @@ async fn main() {
             std::process::exit(1);
         }
 
-        resolver::resolve_blocker(Some(Path::new(&format!(".\\{}", DEFAULT_BLOCKER_FILE_NAME)))).await.unwrap();
+        let current_location = env::current_exe().unwrap();
+        let blocker_location = current_location
+            .parent()
+            .unwrap()
+            .join(DEFAULT_BLOCKER_FILE_NAME);
+        resolver::resolve_blocker(Some(&blocker_location))
+            .await
+            .unwrap();
         return;
     }
 
@@ -62,12 +71,17 @@ async fn main() {
         let lock = NamedMutex::new(&format!("{} SINGLETON MUTEX", APP_NAME)).unwrap();
         match lock.try_lock() {
             Ok(Some(_guard)) => run().await,
-            Ok(None) => error!("App is already running.\nExiting..."),
-            Err(e) => error!("Failed to lock singleton mutex: {}", e),
+            Ok(None) => {
+                error!("App is already running. (use --ignore-singleton to ignore)\nExiting...")
+            }
+            Err(e) => error!(
+                "Failed to lock singleton mutex: {} (use --ignore-singleton to ignore)  ",
+                e
+            ),
         };
     }
 
-    console::global::unset();
+    logger::global::unset();
 }
 
 async fn run() {

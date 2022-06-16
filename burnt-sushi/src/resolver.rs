@@ -6,8 +6,8 @@ use std::{
 use log::{debug, error, warn};
 
 use crate::{
-    blocker::{FilterConfig,}, APP_AUTHOR, APP_NAME_WITH_VERSION,
-    DEFAULT_BLOCKER_FILE_NAME, DEFAULT_FILTER_FILE_NAME,
+    blocker::FilterConfig, APP_AUTHOR, APP_NAME_WITH_VERSION, DEFAULT_BLOCKER_FILE_NAME,
+    DEFAULT_FILTER_FILE_NAME,
 };
 
 pub async fn resolve_blocker(provided_path: Option<&Path>) -> io::Result<PathBuf> {

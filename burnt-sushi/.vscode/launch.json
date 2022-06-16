@@ -7,15 +7,15 @@
         {
             "type": "lldb",
             "request": "launch",
-            "name": "Debug executable 'burnt-sushi'",
+            "name": "Debug executable 'BurntSushi'",
             "cargo": {
                 "args": [
                     "build",
-                    "--bin=burnt-sushi",
+                    "--bin=BurntSushi",
                     "--package=burnt-sushi"
                 ],
                 "filter": {
-                    "name": "burnt-sushi",
+                    "name": "BurntSushi",
                     "kind": "bin"
                 }
             },
@@ -25,16 +25,16 @@
         {
             "type": "lldb",
             "request": "launch",
-            "name": "Debug unit tests in executable 'burnt-sushi'",
+            "name": "Debug unit tests in executable 'BurntSushi'",
             "cargo": {
                 "args": [
                     "test",
                     "--no-run",
-                    "--bin=burnt-sushi",
+                    "--bin=BurntSushi",
                     "--package=burnt-sushi"
                 ],
                 "filter": {
-                    "name": "burnt-sushi",
+                    "name": "BurntSushi",
                     "kind": "bin"
                 }
             },

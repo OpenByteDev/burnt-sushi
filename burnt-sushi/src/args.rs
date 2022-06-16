@@ -2,11 +2,11 @@ use std::{lazy::SyncLazy, path::PathBuf};
 
 use clap::{ArgEnum, Parser};
 
-use crate::console;
+use crate::logger;
 
 pub static ARGS: SyncLazy<Args> = SyncLazy::new(|| {
     // Try to attach console for printing errors during argument parsing.
-    console::raw::attach();
+    logger::raw::attach();
 
     Args::parse()
 });
