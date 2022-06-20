@@ -1,10 +1,10 @@
-use std::{lazy::SyncLazy, path::PathBuf};
+use std::{path::PathBuf, sync::LazyLock};
 
 use clap::{ArgEnum, Parser};
 
 use crate::logger;
 
-pub static ARGS: SyncLazy<Args> = SyncLazy::new(|| {
+pub static ARGS: LazyLock<Args> = LazyLock::new(|| {
     // Try to attach console for printing errors during argument parsing.
     logger::raw::attach();
 

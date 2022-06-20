@@ -1,4 +1,4 @@
-use std::{ffi::CStr, lazy::SyncOnceCell, mem, panic::AssertUnwindSafe, ptr, slice, sync::Arc};
+use std::{ffi::CStr, mem, panic::AssertUnwindSafe, ptr, slice, sync::Arc, sync::OnceLock};
 
 use cef::*;
 use detour::static_detour;
@@ -39,8 +39,8 @@ pub fn enable(
     filters: Arc<EnumMap<shared::rpc::blocker_service::FilterHook, FilterRuleset>>,
     log_tx: tokio::sync::mpsc::UnboundedSender<LogParams>,
 ) -> Result<(), Box<dyn std::error::Error>> {
-    static GET_ADDR_INFO_HOOK: SyncOnceCell<()> = SyncOnceCell::new();
-    static CEF_URL_REQUEST_CREATE_HOOK: SyncOnceCell<()> = SyncOnceCell::new();
+    static GET_ADDR_INFO_HOOK: OnceLock<()> = OnceLock::new();
+    static CEF_URL_REQUEST_CREATE_HOOK: OnceLock<()> = OnceLock::new();
 
     GET_ADDR_INFO_HOOK
         .get_or_try_init(|| init_get_addr_info_hook(filters.clone(), log_tx.clone()))?;

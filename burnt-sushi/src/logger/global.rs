@@ -1,8 +1,8 @@
-use std::lazy::SyncOnceCell;
+use std::sync::OnceLock;
 
 use super::{Console, Logger};
 
-static LOGGER: SyncOnceCell<Logger> = SyncOnceCell::new();
+static LOGGER: OnceLock<Logger> = OnceLock::new();
 
 pub fn init() -> &'static Logger {
     let logger = LOGGER.get_or_init(|| Logger::new(Console::none()));
@@ -11,9 +11,7 @@ pub fn init() -> &'static Logger {
 }
 
 pub fn get() -> &'static Logger {
-    LOGGER
-        .get()
-        .unwrap_or_else(init)
+    LOGGER.get().unwrap_or_else(init)
 }
 
 pub fn unset() {

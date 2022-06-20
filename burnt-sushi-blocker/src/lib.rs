@@ -1,9 +1,9 @@
-#![feature(once_cell, io_safety)]
+#![feature(once_cell)]
 
 use std::{
-    cell::RefCell,
-    lazy::{OnceCell, SyncLazy},
+    cell::{OnceCell, RefCell},
     net::{Ipv4Addr, SocketAddrV4},
+    sync::LazyLock,
     sync::{Arc, Mutex},
     thread,
 };
@@ -20,7 +20,7 @@ mod cef;
 mod hooks;
 mod utils;
 
-static RPC_STATE: SyncLazy<Mutex<Option<RpcState>>> = SyncLazy::new(|| Mutex::new(None));
+static RPC_STATE: LazyLock<Mutex<Option<RpcState>>> = LazyLock::new(|| Mutex::new(None));
 
 struct RpcState {
     rpc_thread: thread::JoinHandle<()>,
