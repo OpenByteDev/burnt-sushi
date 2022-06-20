@@ -13,7 +13,10 @@ use winapi::um::{
     winuser::{PostThreadMessageW, WM_QUIT},
 };
 
-use crate::{APP_NAME, logger::{self, Console}};
+use crate::{
+    logger::{self, Console},
+    APP_NAME,
+};
 
 static INITIALIZED: AtomicBool = AtomicBool::new(false);
 
