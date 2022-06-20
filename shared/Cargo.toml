@@ -10,13 +10,13 @@ edition = "2021"
 keywords = ["spotify", "adblocker", "windows", "blocker", "payload"]
 
 [dependencies]
-capnp = { version = "0.14", default-features = false }
-regex = { version = "1.5", features = ["std"], default-features = false }
-enum-map = { version = "2.0", default-features = false }
+capnp = { version = "0.14.6", default-features = false }
+regex = { version = "1.5.6", features = ["std"], default-features = false }
+enum-map = { version = "2.4.0", default-features = false }
 
 [build-dependencies]
-capnpc = "0.14"
-cargo-emit = "0.2"
+capnpc = "0.14.7"
+cargo-emit = "0.2.1"
 
 [profile.release]
 strip = true  # Automatically strip symbols from the binary.
