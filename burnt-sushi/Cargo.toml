@@ -35,7 +35,7 @@ is_elevated = { version = "0.1", default-features = false }
 
 [build-dependencies]
 cargo-emit = "0.2"
-embed-resource = "1.7"
+winres = "0.1"
 
 [profile.release]
 strip = true  # Automatically strip symbols from the binary.

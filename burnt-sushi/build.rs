@@ -1,7 +1,18 @@
 use std::{env, fs, path::PathBuf, process::Command};
 
 fn main() {
-    embed_resource::compile("resources.rc");
+    let mut res = winres::WindowsResource::new();
+    res.set_language(0x0409 /* English */);
+    res.set_icon("icon.ico");
+    res.set_icon_with_id("icon.ico", "TRAYICON");
+    res.set_manifest_file("BurntSushi.exe.manifest");
+    res.set("FileDescription", env!("CARGO_PKG_DESCRIPTION"));
+    res.set("ProductName", "BurntSushi");
+    res.set("OriginalFilename", "BurntSushi.exe");
+    res.set("CompanyName", "OpenByte");
+    res.compile().unwrap();
+
+    // embed_resource::compile("resources.rc");
 
     fs::copy(
         build_crate(

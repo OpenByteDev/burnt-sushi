@@ -1,4 +1,0 @@
-#define RT_MANIFEST 24
-1 RT_MANIFEST "burnt-sushi.exe.manifest"
-1 ICON "./icon.ico"
-TRAYICON ICON "./icon.ico"
