@@ -13,7 +13,7 @@ use winapi::um::{
     winuser::{PostThreadMessageW, WM_QUIT},
 };
 
-use crate::logger::{self, Console};
+use crate::{APP_NAME, logger::{self, Console}};
 
 static INITIALIZED: AtomicBool = AtomicBool::new(false);
 
@@ -86,7 +86,7 @@ pub struct SystemTrayIcon {
     #[nwg_resource(source_embed: Some(&data.embed), source_embed_str: Some("TRAYICON"))]
     icon: nwg::Icon,
 
-    #[nwg_control(icon: Some(&data.icon), tip: Some("Hello"))]
+    #[nwg_control(icon: Some(&data.icon), tip: Some(APP_NAME))]
     #[nwg_events(MousePressLeftUp: [SystemTrayIcon::show_menu], OnContextMenu: [SystemTrayIcon::show_menu])]
     tray: nwg::TrayNotification,
 
