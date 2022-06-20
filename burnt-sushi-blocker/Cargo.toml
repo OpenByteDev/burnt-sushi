@@ -26,6 +26,9 @@ u16cstr = { version = "0.3.1", default-features = false }
 [lib]
 crate_type = ["cdylib"]
 
+[patch.crates-io]
+mmap-fixed = { git = "https://github.com/khang06/rust-mmap-fixed-fixed.git", rev = "47116f5" }
+
 [profile.release]
 strip = true  # Automatically strip symbols from the binary.
 lto = true
