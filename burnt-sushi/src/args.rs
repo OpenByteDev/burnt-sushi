@@ -40,6 +40,9 @@ pub struct Args {
 
     #[clap(long, hide = true)]
     pub install: bool,
+
+    #[clap(long, hide = true)]
+    pub autostart: bool,
 }
 
 #[derive(ArgEnum, Clone, Copy, Debug)]
