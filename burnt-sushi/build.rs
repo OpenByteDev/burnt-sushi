@@ -42,6 +42,11 @@ fn build_crate(name: &str, target: &str, file: &str) -> PathBuf {
     cargo_emit::rerun_if_changed!("..\\{}", name);
 
     let mut command = Command::new(&cargo_exe);
+
+    if cfg!(nightly) {
+        command.arg("+nightly");
+    }
+
     command
         .arg("build")
         .arg("--target")
