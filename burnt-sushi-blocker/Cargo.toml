@@ -10,7 +10,7 @@ edition = "2021"
 keywords = ["spotify", "adblocker", "windows", "blocker", "payload"]
 
 [dependencies]
-dll-syringe = { version = "0.12.0", features = ["payload-utils"], default-features = true }
+dll-syringe = { version = "0.13.1", features = ["payload-utils"], default-features = true }
 capnp = { version = "0.14.6", default-features = false }
 capnp-rpc = { version = "0.14.1", default-features = false }
 futures = { version = "0.3.21", default-features = false }
@@ -21,7 +21,7 @@ detour = { version = "0.8.1", features = ["nightly"], default-features = false }
 shared = { path = "../shared", default-features = false }
 regex = { version = "1.5.6", default-features = false }
 enum-map = { version = "2.4.0", default-features = false }
-u16cstr = { version = "0.3.1", default-features = false }
+u16cstr = { version = "0.5.0", default-features = false }
 
 [lib]
 crate_type = ["cdylib"]

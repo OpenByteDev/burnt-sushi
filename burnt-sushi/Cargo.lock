@@ -118,9 +118,9 @@ checksum = "baf1de4339761588bc0619e3cbc0120ee582ebb74b53b4efbf79117bd2da40fd"
 
 [[package]]
 name = "clap"
-version = "3.2.5"
+version = "3.2.6"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "d53da17d37dba964b9b3ecb5c5a1f193a2762c700e6829201e645b9381c99dc7"
+checksum = "9f1fe12880bae935d142c8702d500c63a4e8634b6c3c57ad72bf978fc7b6249a"
 dependencies = [
  "bitflags",
  "clap_derive",
@@ -132,9 +132,9 @@ dependencies = [
 
 [[package]]
 name = "clap_derive"
-version = "3.2.5"
+version = "3.2.6"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "c11d40217d16aee8508cc8e5fde8b4ff24639758608e5374e731b53f85749fb9"
+checksum = "ed6db9e867166a43a53f7199b5e4d1f522a1e5bd626654be263c999ce59df39a"
 dependencies = [
  "heck",
  "proc-macro-error",
@@ -145,9 +145,9 @@ dependencies = [
 
 [[package]]
 name = "clap_lex"
-version = "0.2.2"
+version = "0.2.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "5538cd660450ebeb4234cfecf8f2284b844ffc4c50531e66d584ad5b91293613"
+checksum = "87eba3c8c7f42ef17f6c659fc7416d0f4758cd3e58861ee63c5fa4a4dde649e4"
 dependencies = [
  "os_str_bytes",
 ]
@@ -180,9 +180,9 @@ dependencies = [
 
 [[package]]
 name = "dll-syringe"
-version = "0.12.0"
+version = "0.13.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "f3be6aa1d8bb64d5d89baf2c8c360e0c5bd458b88334fc1ce1726f7965bd5eb2"
+checksum = "9bc7c64d025965e51bc0f6208ebdef936f962dd0e14a44f4dbb19e082ac18898"
 dependencies = [
  "bincode",
  "cstr",
@@ -197,7 +197,6 @@ dependencies = [
  "stopwatch",
  "sysinfo",
  "thiserror",
- "u16cstr",
  "widestring",
  "winapi",
 ]
@@ -340,9 +339,9 @@ dependencies = [
 
 [[package]]
 name = "indexmap"
-version = "1.9.0"
+version = "1.9.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "6c6392766afd7964e2531940894cffe4bd8d7d17dbc3c1c4857040fd4b33bdb3"
+checksum = "10a35a97730320ffe8e2d410b5d3b69279b98d2c14bdb8b70ea89ecf7888d41e"
 dependencies = [
  "autocfg",
  "hashbrown",
@@ -422,9 +421,9 @@ dependencies = [
 
 [[package]]
 name = "native-windows-derive"
-version = "1.0.4"
+version = "1.0.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "8164b076b08fb63f7cb4da207abe8fd94b5c604e17d9f49618807482dbe25507"
+checksum = "76134ae81020d89d154f619fd2495a2cecad204276b1dc21174b55e4d0975edd"
 dependencies = [
  "proc-macro-crate",
  "proc-macro2",
@@ -939,16 +938,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "u16cstr"
-version = "0.3.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "7d027f1890f982278dd7921293d4dfd8cdcb0dbfc3b17a1c91f329c24012d335"
-dependencies = [
- "wchar",
- "widestring",
-]
-
-[[package]]
 name = "unicode-ident"
 version = "1.0.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -967,30 +956,10 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "9c8d87e72b64a3b4db28d11ce29237c246188f4f51057d65a7eab63b7987e423"
 
 [[package]]
-name = "wchar"
-version = "0.11.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "e1ca6ea80317e76471c3aa6d47efb151ef04538960ab810845a1c854f5cd7d8c"
-dependencies = [
- "wchar-impl",
-]
-
-[[package]]
-name = "wchar-impl"
-version = "0.11.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "075c93156fed21f9dab57af5e81604d0fdb67432c919a8c1f78bb979f06a3d25"
-dependencies = [
- "proc-macro2",
- "quote",
- "syn",
-]
-
-[[package]]
 name = "widestring"
-version = "0.5.1"
+version = "1.0.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "17882f045410753661207383517a6f62ec3dbeb6a4ed2acce01f0728238d1983"
+checksum = "a5ebb1abbff1aa611839e14864856c9fc67d3af74593e3cb79f3d56ffdf9e443"
 
 [[package]]
 name = "winapi"
@@ -1074,14 +1043,15 @@ checksum = "c811ca4a8c853ef420abd8592ba53ddbbac90410fab6903b3e79972a631f7680"
 
 [[package]]
 name = "wineventhook"
-version = "0.2.2"
+version = "0.3.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "beb39e82e7908337f7c66211f8ee75139fcf3295f0cfa2e52e79694e40b31a70"
+checksum = "e9673f38575f38048d32ed1eae2611b55e62a05db662734ee3e2c034a0ea341d"
 dependencies = [
  "async-thread",
  "bitflags",
  "cstr",
  "num_enum",
+ "once_cell",
  "tokio",
  "winapi",
 ]
