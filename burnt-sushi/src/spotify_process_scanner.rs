@@ -3,6 +3,7 @@ use std::{
     mem::{self, MaybeUninit},
     num::{NonZeroU32, NonZeroUsize},
     os::windows::prelude::{AsRawHandle, HandleOrInvalid, OwnedHandle},
+    ptr,
 };
 
 use dll_syringe::process::{OwnedProcess, Process};
@@ -235,8 +236,7 @@ fn get_window_process(window: WindowHandle) -> io::Result<OwnedProcess> {
 }
 
 fn get_window_thread_id(window: WindowHandle) -> NonZeroU32 {
-    let mut process_id = MaybeUninit::uninit();
-    let thread_id = unsafe { GetWindowThreadProcessId(window.as_ptr(), process_id.as_mut_ptr()) };
+    let thread_id = unsafe { GetWindowThreadProcessId(window.as_ptr(), ptr::null_mut()) };
     NonZeroU32::new(thread_id).unwrap()
 }
 
