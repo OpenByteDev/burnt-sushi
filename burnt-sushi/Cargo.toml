@@ -19,7 +19,7 @@ futures = { version = "0.3.21", default-features = false }
 tokio = { version = "1.19.2", features = ["net", "rt", "macros", "fs"], default-features = false }
 tokio-util = { version = "0.7.3", features = ["compat"], default-features = false }
 winapi = { version = "0.3.9", features = ["winuser", "tlhelp32"], default-features = false }
-wineventhook = { version = "0.3.0", default-features = false }
+wineventhook = { version = "0.4.0", default-features = false }
 project-uninit = { version = "0.1.1", default-features = false }
 fallible-iterator = { version = "0.2.0", default-features = false }
 async-thread = { version = "0.1.2", default-features = false }

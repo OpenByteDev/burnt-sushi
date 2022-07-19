@@ -1043,9 +1043,9 @@ checksum = "c811ca4a8c853ef420abd8592ba53ddbbac90410fab6903b3e79972a631f7680"
 
 [[package]]
 name = "wineventhook"
-version = "0.3.0"
+version = "0.4.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "e9673f38575f38048d32ed1eae2611b55e62a05db662734ee3e2c034a0ea341d"
+checksum = "48600aa82347461b51a0ebf1e534c87b2fefa7b6d44dcc52510768ac76099c0c"
 dependencies = [
  "async-thread",
  "bitflags",
