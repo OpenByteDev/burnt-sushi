@@ -1,4 +1,4 @@
-#![feature(once_cell, maybe_uninit_uninit_array, maybe_uninit_slice, let_chains)]
+#![feature(once_cell, maybe_uninit_uninit_array, maybe_uninit_slice)]
 #![warn(unsafe_op_in_unsafe_fn)]
 #![allow(clippy::module_inception, non_snake_case)]
 #![windows_subsystem = "windows"]
