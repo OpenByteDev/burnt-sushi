@@ -1,6 +1,6 @@
 use std::{path::PathBuf, sync::LazyLock};
 
-use clap::{ArgEnum, Parser};
+use clap::{ValueEnum, Parser};
 
 use crate::logger;
 
@@ -12,40 +12,40 @@ pub static ARGS: LazyLock<Args> = LazyLock::new(|| {
 });
 
 #[derive(Parser, Debug)]
-#[clap(author, version, about, long_about = None)]
+#[command(author, version, about, long_about = None)]
 pub struct Args {
     /// Show a console window with debug output.
-    #[clap(long)]
+    #[arg(long)]
     pub console: bool,
 
     /// Level of debug output.
-    #[clap(long, arg_enum, default_value = "debug")]
+    #[arg(long, value_enum, default_value = "debug")]
     pub log_level: LogLevel,
 
     /// Start a new instance of this app even if one is already running.
-    #[clap(long)]
+    #[arg(long)]
     pub ignore_singleton: bool,
 
     /// Path to the blocker module.
     /// If the file doesn't exist it will be created with the default blocker.
     /// If not specified the app will try to find it in the same directory as the app with name `burnt-sushi-blocker-x86.dll` or write it to a temp file.
-    #[clap(long)]
+    #[arg(long)]
     pub blocker: Option<PathBuf>,
 
     /// Path to the filter config.
     /// If the file doesn't exist it will be created with the default config.
     /// If not specified the app will try to find it in the same directory as the app named `filter.toml`.
-    #[clap(long)]
+    #[arg(long)]
     pub filters: Option<PathBuf>,
 
-    #[clap(long, hide = true)]
+    #[arg(long, hide = true)]
     pub install: bool,
 
-    #[clap(long, hide = true)]
+    #[arg(long, hide = true)]
     pub autostart: bool,
 }
 
-#[derive(ArgEnum, Clone, Copy, Debug)]
+#[derive(ValueEnum, Clone, Copy, Debug)]
 pub enum LogLevel {
     Off,
     Trace,

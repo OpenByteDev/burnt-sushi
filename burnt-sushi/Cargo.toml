@@ -11,26 +11,26 @@ keywords = ["spotify", "adblocker", "windows", "blocker"]
 
 [dependencies]
 dll-syringe = { version = "0.13.1", features = ["into-x86-from-x64", "rpc"], default-features = false }
-capnp = { version = "0.14.6", default-features = false }
-capnp-rpc = { version = "0.14.1", default-features = false }
+capnp = { version = "0.15.0", default-features = false }
+capnp-rpc = { version = "0.15.0", default-features = false }
 toml = { version = "0.5.9", default-features = false }
-serde = { version = "1.0.137", features = ["derive"], default-features = false }
-futures = { version = "0.3.21", default-features = false }
-tokio = { version = "1.19.2", features = ["net", "rt", "macros", "fs"], default-features = false }
-tokio-util = { version = "0.7.3", features = ["compat"], default-features = false }
+serde = { version = "1.0.147", features = ["derive"], default-features = false }
+futures = { version = "0.3.25", default-features = false }
+tokio = { version = "1.22.0", features = ["net", "rt", "macros", "fs"], default-features = false }
+tokio-util = { version = "0.7.4", features = ["compat"], default-features = false }
 winapi = { version = "0.3.9", features = ["winuser", "tlhelp32"], default-features = false }
-wineventhook = { version = "0.4.0", default-features = false }
+wineventhook = { version = "0.5.0", default-features = false }
 project-uninit = { version = "0.1.1", default-features = false }
 fallible-iterator = { version = "0.2.0", default-features = false }
 async-thread = { version = "0.1.2", default-features = false }
 log = { version = "0.4.17", default-features = false }
 shared = { path = "../shared", default-features = false }
-native-windows-gui = { version = "1.0.12", default-features = false, features = ["tray-notification", "message-window", "menu", "cursor", "image-decoder", "embed-resource"] }
+native-windows-gui = { version = "1.0.13", default-features = false, features = ["tray-notification", "message-window", "menu", "cursor", "image-decoder", "embed-resource"] }
 native-windows-derive = { version = "1.0.5", default-features = false }
-pipedconsole = { version = "0.3.0", default-features = false }
-widestring = { version = "1.0.1", default-features = false }
-ctrlc = { version = "3.2.2", default-features = false }
-clap = { version = "3.2.6", default-features = false, features = ["std", "derive"] }
+pipedconsole = { version = "0.3.1", default-features = false }
+widestring = { version = "1.0.2", default-features = false }
+ctrlc = { version = "3.2.3", default-features = false }
+clap = { version = "4.0.26", default-features = false, features = ["std", "derive"] }
 is_elevated = { version = "0.1.2", default-features = false }
 
 [build-dependencies]

@@ -1,6 +1,6 @@
 #![feature(variant_count)]
 
-use core::{cmp, fmt, hash};
+use core::{fmt, hash};
 use std::mem;
 
 #[allow(dead_code)]
@@ -18,8 +18,6 @@ impl hash::Hash for rpc::blocker_service::FilterHook {
         core::mem::discriminant(self).hash(state)
     }
 }
-
-impl cmp::Eq for rpc::blocker_service::FilterHook {}
 
 impl fmt::Display for rpc::blocker_service::FilterHook {
     fn fmt(&self, f: &mut fmt::Formatter) -> Result<(), fmt::Error> {
