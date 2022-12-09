@@ -9,9 +9,9 @@
 #![allow(clippy::module_inception, non_snake_case)]
 #![windows_subsystem = "windows"]
 
+use anyhow::{anyhow, Context};
 use dll_syringe::process::{OwnedProcess, Process};
 use log::{debug, error, info, trace, warn};
-use anyhow::{anyhow, Context};
 use winapi::{
     shared::minwindef::FALSE,
     um::{processthreadsapi::OpenProcess, synchapi::WaitForSingleObject, winnt::PROCESS_TERMINATE},
@@ -173,7 +173,9 @@ async fn handle_install() -> anyhow::Result<()> {
         .parent()
         .ok_or_else(|| anyhow!("Failed to determine parent directory"))?
         .join(DEFAULT_BLOCKER_FILE_NAME);
-    resolver::resolve_blocker(Some(&blocker_location)).await.context("Failed to write blocker to disk")?;
+    resolver::resolve_blocker(Some(&blocker_location))
+        .await
+        .context("Failed to write blocker to disk")?;
 
     Ok(())
 }

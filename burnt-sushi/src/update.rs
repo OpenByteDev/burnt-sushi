@@ -17,7 +17,7 @@ use widestring::U16CString;
 use winapi::um::{shellapi::ShellExecuteW, winuser::SW_SHOWDEFAULT};
 use winrt_toast::{Action, Text, Toast, ToastManager};
 
-use crate::{APP_NAME, ARGS, APP_VERSION};
+use crate::{APP_NAME, APP_VERSION, ARGS};
 
 pub async fn update() -> anyhow::Result<bool> {
     let releases = tokio::task::spawn_blocking(load_releases)
@@ -82,7 +82,11 @@ pub async fn update() -> anyhow::Result<bool> {
         .tempdir()
         .context("Failed to create temporary directory")?;
     let tmp_bin_path = tmp_dir.path().join(&asset.name);
-    let tmp_bin = File::create(&tmp_bin_path).await.context("Error creating temporary file")?.into_std().await;
+    let tmp_bin = File::create(&tmp_bin_path)
+        .await
+        .context("Error creating temporary file")?
+        .into_std()
+        .await;
 
     tokio::task::spawn_blocking(move || download_file(&asset.download_url, tmp_bin))
         .await
@@ -93,7 +97,9 @@ pub async fn update() -> anyhow::Result<bool> {
 
     let moved_bin = current_exe.with_extension("exe.bak");
 
-    fs::rename(&current_exe, &moved_bin).await.context("Failed to move current executable")?;
+    fs::rename(&current_exe, &moved_bin)
+        .await
+        .context("Failed to move current executable")?;
     match fs::rename(&tmp_bin_path, &current_exe).await {
         Ok(_) => {}
         Err(e) if e.raw_os_error() == Some(17) => {
@@ -101,7 +107,10 @@ pub async fn update() -> anyhow::Result<bool> {
                 .await
                 .context("Failed to copy updated executable to current executable path")?;
         }
-        Err(e) => return Err(e).context("Failed to move updated executable to current executable path")?,
+        Err(e) => {
+            return Err(e)
+                .context("Failed to move updated executable to current executable path")?
+        }
     }
 
     debug!("Switched out binary");
@@ -128,12 +137,12 @@ fn restart(new_exe: &Path, old_exe: &Path) -> anyhow::Result<()> {
 
 fn restart_elevated() -> anyhow::Result<()> {
     let exe = U16CString::from_os_str(
-        env::current_exe().context("Failed to locate current executable")?.into_os_string()
-    ).context("Current executable has an invalid path?")?;
-    let current_args = env::args()
-        .skip(1)
-        .collect::<Vec<_>>()
-        .join(" ");
+        env::current_exe()
+            .context("Failed to locate current executable")?
+            .into_os_string(),
+    )
+    .context("Current executable has an invalid path?")?;
+    let current_args = env::args().skip(1).collect::<Vec<_>>().join(" ");
     let new_args = "--update-elevate-restart --singleton-wait-for-shutdown";
     let args = U16CString::from_str(format!("{current_args} {new_args}"))
         .context("Arguments contain invalid characters")?;
