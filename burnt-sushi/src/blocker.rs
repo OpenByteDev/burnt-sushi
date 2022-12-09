@@ -60,6 +60,10 @@ impl SpotifyAdBlocker {
                         },
                         SpotifyState::Stopped => {
                             self.state.unhook_spotify().await;
+                            if ARGS.shutdown_with_spotify {
+                                info!("Shutting down due to spotify exit...");
+                                break;
+                            }
                             info!("Looking for Spotify...");
                         }
                     }

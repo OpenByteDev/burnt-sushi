@@ -131,7 +131,6 @@ async fn run() {
 
     tokio::select! {
         _ = app.run() => {
-            unreachable!("App should never exit on its own");
         }
         _ = wait_for_ctrl_c() => {
             debug!("Ctrl-C received");

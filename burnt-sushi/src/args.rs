@@ -26,6 +26,10 @@ pub struct Args {
     #[arg(long)]
     pub ignore_singleton: bool,
 
+    /// Exit program once spotify is closed, will wait for spotify to start if not currently running.
+    #[arg(long)]
+    pub shutdown_with_spotify: bool,
+
     /// Path to the blocker module.
     /// If the file doesn't exist it will be created with the default blocker.
     /// If not specified the app will try to find it in the same directory as the app with name `burnt-sushi-blocker-x86.dll` or write it to a temp file.
