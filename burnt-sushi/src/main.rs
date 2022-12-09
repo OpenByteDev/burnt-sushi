@@ -67,7 +67,7 @@ async fn main() {
     if ARGS.install {
         match handle_install().await {
             Ok(()) => info!("App successfully installed."),
-            Err(e) => error!("Failed to install application: {}", e),
+            Err(e) => error!("Failed to install application: {e}"),
         }
         return;
     }
@@ -80,7 +80,7 @@ async fn main() {
         match terminate_other_instances() {
             Ok(_) => debug!("Killed previously running instances"),
             Err(err) => {
-                error!("Failed to open previously running instance (err={})", err);
+                error!("Failed to open previously running instance (err={err})");
                 return;
             }
         }
@@ -89,7 +89,7 @@ async fn main() {
     if ARGS.ignore_singleton {
         run().await;
     } else {
-        let lock = NamedMutex::new(&format!("{} SINGLETON MUTEX", APP_NAME)).unwrap();
+        let lock = NamedMutex::new(&format!("{APP_NAME} SINGLETON MUTEX")).unwrap();
 
         let mut guard_result = lock.try_lock();
 
@@ -125,7 +125,7 @@ async fn run() {
         match update::update().await {
             Ok(true) => update_restart_tx.send(()).unwrap(),
             Ok(false) => {}
-            Err(e) => error!("App update failed: {:#}", e),
+            Err(e) => error!("App update failed: {e:#}"),
         }
     });
 

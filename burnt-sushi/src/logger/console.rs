@@ -157,8 +157,8 @@ impl Console {
     pub fn println(&self, s: impl Display) -> io::Result<()> {
         match &self.0 {
             ConsoleImpl::None => {}
-            ConsoleImpl::Attach | ConsoleImpl::Alloc => println!("{}", s),
-            ConsoleImpl::Piped { pipe, .. } => writeln!(pipe.lock().unwrap(), "{}", s)?,
+            ConsoleImpl::Attach | ConsoleImpl::Alloc => println!("{s}"),
+            ConsoleImpl::Piped { pipe, .. } => writeln!(pipe.lock().unwrap(), "{s}")?,
         }
         Ok(())
     }

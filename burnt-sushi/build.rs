@@ -41,7 +41,7 @@ fn build_crate(name: &str, target: &str, file: &str) -> PathBuf {
     crate_dir.push(name);
     cargo_emit::rerun_if_changed!("..\\{}", name);
 
-    let mut command = Command::new(&cargo_exe);
+    let mut command = Command::new(cargo_exe);
 
     if cfg!(nightly) {
         command.arg("+nightly");
@@ -66,7 +66,7 @@ fn build_crate(name: &str, target: &str, file: &str) -> PathBuf {
     crate_artifact.push(if is_release { "release" } else { "debug" });
     crate_artifact.push(file);
 
-    assert!(crate_artifact.exists(), "{:?}", crate_artifact);
+    assert!(crate_artifact.exists(), "{crate_artifact:?}");
 
     crate_artifact
 }

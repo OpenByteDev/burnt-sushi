@@ -17,8 +17,7 @@ futures = { version = "0.3.25", default-features = false }
 tokio = { version = "1.23.0", features = ["net", "rt", "macros", "sync"], default-features = false }
 tokio-util = { version = "0.7.4", features = ["compat"], default-features = false }
 winapi = { version = "0.3.9", features = ["ws2tcpip", "rpc"], default-features = false }
-# detour = { version = "0.8.1", features = ["nightly"], default-features = false }
-detour = { git = "https://github.com/Hpmason/detour-rs.git", branch = "fix-nightly1.67.0-changes", commit = "0773585c9d4940fe6dd104076a46e8e11495080e", features = ["nightly"], default-features = false }
+detour = { git = "https://github.com/Hpmason/detour-rs.git", branch = "fix-nightly1.67.0-changes", features = ["nightly"], default-features = false }
 shared = { path = "../shared", default-features = false }
 regex = { version = "1.7.0", default-features = false }
 enum-map = { version = "2.4.1", default-features = false }

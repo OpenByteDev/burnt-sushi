@@ -7,7 +7,6 @@ use std::{
 };
 
 use anyhow::Context;
-use lenient_semver;
 use log::{debug, error, info};
 use reqwest::header::HeaderValue;
 use self_update::update::Release;
@@ -68,8 +67,7 @@ pub async fn update() -> anyhow::Result<bool> {
     let asset = release
         .assets
         .into_iter()
-        .filter(|asset| asset.name.ends_with(".exe"))
-        .next()
+        .find(|asset| asset.name.ends_with(".exe"))
         .context("No release executable asset found")?;
 
     debug!(
@@ -185,7 +183,7 @@ async fn confirm_update(version: &str) -> bool {
     let mut toast = Toast::new();
     toast
         .text1("BurntSushi")
-        .text2(Text::new(format!("Update app to to {}?", version)))
+        .text2(Text::new(format!("Update app to to {version}?")))
         .action(Action::new("Update", CONFIRM_ACTION, CONFIRM_ACTION))
         .action(Action::new("Ignore", IGNORE_ACTION, IGNORE_ACTION));
 
