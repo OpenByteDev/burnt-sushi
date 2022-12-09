@@ -49,6 +49,10 @@ impl NamedMutex {
         }
     }
 
+    pub unsafe fn force_unlock(&self) -> io::Result<()> {
+        unsafe { self.new_guard() }.unlock()
+    }
+
     unsafe fn new_guard(&self) -> NamedMutexGuard {
         NamedMutexGuard(self.0, PhantomData)
     }

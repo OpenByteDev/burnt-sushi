@@ -4,15 +4,15 @@ version = 3
 
 [[package]]
 name = "capnp"
-version = "0.15.0"
+version = "0.15.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "0e850735c543306805e2ba8ee0a9632b0f62bb05872a8be2e2674e9903a1c048"
+checksum = "afaa14ddcf4553e700608c1c0ee3ca1f4cf673470462b99ff6dd6bedcdb6c6ce"
 
 [[package]]
 name = "capnpc"
-version = "0.15.0"
+version = "0.15.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "0ed9e0059e1c97ed65eb246d90fb843a16f8da5eb31ec4a560acb31a825923f9"
+checksum = "c75a954b6ee17550b08c549cb6159ec7f905fe9a1ed4ba27b7d11353dc093710"
 dependencies = [
  "capnp",
 ]
@@ -78,7 +78,7 @@ checksum = "456c603be3e8d448b072f410900c09faf164fbce2d480456f50eea6e25f9c848"
 
 [[package]]
 name = "shared"
-version = "0.1.1"
+version = "0.2.0"
 dependencies = [
  "capnp",
  "capnpc",

@@ -1,6 +1,6 @@
 use std::{path::PathBuf, sync::LazyLock};
 
-use clap::{ValueEnum, Parser};
+use clap::{Parser, ValueEnum};
 
 use crate::logger;
 
@@ -41,8 +41,20 @@ pub struct Args {
     #[arg(long, hide = true)]
     pub install: bool,
 
+    #[arg(long, hide = false)]
+    pub update_old_bin: Option<PathBuf>,
+
+    #[arg(long, hide = true)]
+    pub update_elevate_restart: bool,
+
+    #[arg(long, hide = true)]
+    pub singleton_wait_for_shutdown: bool,
+
     #[arg(long, hide = true)]
     pub autostart: bool,
+
+    #[arg(long, hide = true)]
+    pub force_restart: bool,
 }
 
 #[derive(ValueEnum, Clone, Copy, Debug)]

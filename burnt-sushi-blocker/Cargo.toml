@@ -1,6 +1,6 @@
 [package]
 name = "burnt-sushi-blocker"
-version = "0.1.1"
+version = "0.2.0"
 description = "Spotify AdBlocker for Windows"
 readme = "../README.md"
 repository = "https://github.com/OpenByteDev/burnt-sushi"
@@ -11,10 +11,10 @@ keywords = ["spotify", "adblocker", "windows", "blocker", "payload"]
 
 [dependencies]
 dll-syringe = { version = "0.14.0", features = ["payload-utils"], default-features = true }
-capnp = { version = "0.15.0", default-features = false }
+capnp = { version = "0.15.1", default-features = false }
 capnp-rpc = { version = "0.15.0", default-features = false }
 futures = { version = "0.3.25", default-features = false }
-tokio = { version = "1.22.0", features = ["net", "rt", "macros", "sync"], default-features = false }
+tokio = { version = "1.23.0", features = ["net", "rt", "macros", "sync"], default-features = false }
 tokio-util = { version = "0.7.4", features = ["compat"], default-features = false }
 winapi = { version = "0.3.9", features = ["ws2tcpip", "rpc"], default-features = false }
 # detour = { version = "0.8.1", features = ["nightly"], default-features = false }
