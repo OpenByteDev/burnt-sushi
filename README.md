@@ -5,7 +5,7 @@
 A Spotify AdBlocker for Windows that works via DLL injection and function hooking.
 
 ## Installation
-The latest version can be downloaded [here](https://github.com/OpenByteDev/burnt-sushi/releases/tag/0.1.1). The app is portable and there is no need for an installation.
+The latest version can be downloaded [here](https://github.com/OpenByteDev/burnt-sushi/releases/tag/0.2.0). The app is portable and there is no need for an installation.
 
 ## FAQ
 ### How does it work?
