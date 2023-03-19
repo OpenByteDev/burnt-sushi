@@ -1,9 +1,9 @@
 use std::{ffi::CStr, mem, panic::AssertUnwindSafe, ptr, slice, sync::Arc, sync::OnceLock};
 
 use cef::*;
-use detour::static_detour;
 use dll_syringe::process::OwnedProcessModule;
 use enum_map::EnumMap;
+use retour::static_detour;
 use winapi::{
     shared::{minwindef::INT, ntdef::PCSTR, ws2def::ADDRINFOA},
     um::winsock2::WSAHOST_NOT_FOUND,

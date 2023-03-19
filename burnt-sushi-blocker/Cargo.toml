@@ -10,14 +10,14 @@ edition = "2021"
 keywords = ["spotify", "adblocker", "windows", "blocker", "payload"]
 
 [dependencies]
-dll-syringe = { version = "0.14.0", features = ["payload-utils"], default-features = true }
-capnp = { version = "0.15.1", default-features = false }
-capnp-rpc = { version = "0.15.0", default-features = false }
+dll-syringe = { version = "0.15.0", features = ["payload-utils"], default-features = true }
+capnp = { version = "0.16.1", default-features = false }
+capnp-rpc = { version = "0.16.1", default-features = false }
 futures = { version = "0.3.25", default-features = false }
 tokio = { version = "1.23.0", features = ["net", "rt", "macros", "sync"], default-features = false }
 tokio-util = { version = "0.7.4", features = ["compat"], default-features = false }
 winapi = { version = "0.3.9", features = ["ws2tcpip", "rpc"], default-features = false }
-detour = { git = "https://github.com/Hpmason/detour-rs.git", branch = "fix-nightly1.67.0-changes", features = ["nightly"], default-features = false }
+retour = { version = "0.1.0", features = ["nightly"], default-features = false }
 shared = { path = "../shared", default-features = false }
 regex = { version = "1.7.0", default-features = false }
 enum-map = { version = "2.4.1", default-features = false }
@@ -25,9 +25,6 @@ u16cstr = { version = "0.4.0", default-features = false }
 
 [lib]
 crate_type = ["cdylib"]
-
-[patch.crates-io]
-mmap-fixed = { git = "https://github.com/khang06/rust-mmap-fixed-fixed.git", rev = "47116f5" }
 
 [profile.release]
 strip = true  # Automatically strip symbols from the binary.

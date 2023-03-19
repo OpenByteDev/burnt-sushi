@@ -10,12 +10,12 @@ edition = "2021"
 keywords = ["spotify", "adblocker", "windows", "blocker", "payload"]
 
 [dependencies]
-capnp = { version = "0.15.1", default-features = false }
-regex = { version = "1.7.0", features = ["std"], default-features = false }
-enum-map = { version = "2.4.1", default-features = false }
+capnp = { version = "0.16.1", default-features = false }
+regex = { version = "1.7.1", features = ["std"], default-features = false }
+enum-map = { version = "2.5.0", default-features = false }
 
 [build-dependencies]
-capnpc = "0.15.1"
+capnpc = "0.16.1"
 cargo-emit = "0.2.1"
 
 [profile.release]
