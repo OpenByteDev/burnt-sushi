@@ -10,17 +10,17 @@ edition = "2021"
 keywords = ["spotify", "adblocker", "windows", "blocker", "payload"]
 
 [dependencies]
-dll-syringe = { version = "0.15.0", features = ["payload-utils"], default-features = true }
-capnp = { version = "0.16.1", default-features = false }
-capnp-rpc = { version = "0.16.1", default-features = false }
-futures = { version = "0.3.25", default-features = false }
-tokio = { version = "1.23.0", features = ["net", "rt", "macros", "sync"], default-features = false }
-tokio-util = { version = "0.7.4", features = ["compat"], default-features = false }
+dll-syringe = { version = "0.15.2", features = ["payload-utils"], default-features = true }
+capnp = { version = "0.17.2", default-features = false }
+capnp-rpc = { version = "0.17.0", default-features = false }
+futures = { version = "0.3.28", default-features = false }
+tokio = { version = "1.29.1", features = ["net", "rt", "macros", "sync"], default-features = false }
+tokio-util = { version = "0.7.8", features = ["compat"], default-features = false }
 winapi = { version = "0.3.9", features = ["ws2tcpip", "rpc"], default-features = false }
-retour = { version = "0.1.0", features = ["nightly"], default-features = false }
+retour = { version = "0.3.0", features = ["nightly", "static-detour"], default-features = false }
 shared = { path = "../shared", default-features = false }
-regex = { version = "1.7.0", default-features = false }
-enum-map = { version = "2.4.1", default-features = false }
+regex = { version = "1.9.1", default-features = false }
+enum-map = { version = "2.6.0", default-features = false }
 u16cstr = { version = "0.4.0", default-features = false }
 
 [lib]

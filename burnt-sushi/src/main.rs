@@ -1,5 +1,6 @@
 #![feature(
-    once_cell,
+    once_cell_try,
+    lazy_cell,
     maybe_uninit_uninit_array,
     maybe_uninit_slice,
     io_error_other,
