@@ -1,5 +1,6 @@
 use std::{mem, net::SocketAddrV4};
 
+use anyhow::Context;
 use dll_syringe::{
     error::SyringeError,
     process::{OwnedProcessModule, Process},
@@ -56,7 +57,7 @@ impl SpotifyAdBlocker {
                     let state = self.spotify_state.borrow();
                     match &*state {
                         SpotifyState::Running(spotify) => {
-                            self.state.hook_spotify(spotify.try_clone().unwrap()).await;
+                            self.state.hook_spotify(spotify.try_clone().unwrap()).await.unwrap();
                         },
                         SpotifyState::Stopped => {
                             self.state.unhook_spotify().await;
@@ -80,26 +81,29 @@ impl SpotifyAdBlocker {
 }
 
 impl SpotifyHookState {
-    async fn hook_spotify(&mut self, spotify: SpotifyInfo) {
+    async fn hook_spotify(&mut self, spotify: SpotifyInfo) -> anyhow::Result<()> {
         if let SpotifyHookState::Hooked(_) = self {
             self.unhook_spotify().await;
         }
 
-        info!("Found Spotify (PID={})", spotify.process.pid().unwrap());
+        match spotify.process.pid().ok() {
+            Some(pid) => info!("Found Spotify (PID={pid})"),
+            None => info!("Found Spotify")
+        }
         let syringe = Syringe::for_process(spotify.process);
 
         while let Some(prev_payload) = syringe
             .process()
             .find_module_by_name(DEFAULT_BLOCKER_FILE_NAME)
-            .unwrap()
+            .context("Failed to inspect modules of Spotify process.")?
         {
             warn!("Found previously injected blocker");
 
             debug!("Stopping RPC of previous blocker");
             let stop_rpc =
                 unsafe { syringe.get_payload_procedure::<fn()>(prev_payload, "stop_rpc") }
-                    .unwrap()
-                    .unwrap();
+                    .context("Failed to access spotify process.")?
+                    .context("Failed to find stop_rpc in blocker module.")?;
             match stop_rpc.call() {
                 Ok(_) => {
                     debug!("Stopped RPC of previous blocker");
@@ -110,29 +114,31 @@ impl SpotifyHookState {
             }
 
             info!("Ejecting previous blocker...");
-            syringe.eject(prev_payload).unwrap();
-
-            info!("Ejected previous blocker");
+            match syringe.eject(prev_payload) {
+                Ok(_) => info!("Ejected previous blocker"),
+                Err(_) => error!("Failed to eject previous blocker")
+            };
         }
 
         info!("Loading filter config...");
         let filter_config = resolve_filter_config(ARGS.filters.as_ref().map(|p| p.as_ref()))
             .await
-            .unwrap();
+            .context("Failed to resolve filter config.")?;
 
         info!("Preparing blocker...");
         let payload_path = resolve_blocker(ARGS.blocker.as_ref().map(|p| p.as_ref()))
             .await
-            .unwrap();
+            .context("Failed to resolve blocker.")?;
 
         info!("Injecting blocker...");
-        let payload = syringe.inject(payload_path).unwrap();
+        let payload = syringe.inject(payload_path)
+            .context("Failed to inject blocker.")?;
 
         debug!("Starting RPC...");
         let start_rpc =
             unsafe { syringe.get_payload_procedure::<fn() -> SocketAddrV4>(payload, "start_rpc") }
-                .unwrap()
-                .unwrap();
+                .context("Failed to access spotify process.")?
+                .context("Failed to find start_rpc in blocker module.")?;
 
         let rpc_socket_addr = start_rpc.call().unwrap();
 
@@ -153,6 +159,8 @@ impl SpotifyHookState {
             syringe,
             rpc_task,
         });
+
+        Ok(())
     }
 
     async fn unhook_spotify(&mut self) {
