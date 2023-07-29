@@ -112,15 +112,17 @@ impl SystemTrayIcon {
 
     fn show_menu(&self) {
         let (x, y) = nwg::GlobalCursor::position();
-        let has_console = logger::global::get().has_console();
+
+        let log = logger::global::get();
+        let has_console = log.console.is_some();
         self.tray_item2.set_enabled(!has_console);
         self.tray_menu.popup(x, y);
     }
 
     fn show_console(&self) {
-        let l = logger::global::get();
-        if !l.has_console() {
-            l.set_console(Console::piped().unwrap());
+        let mut l = logger::global::get();
+        if !l.console.is_some() {
+            l.console = Some(Console::piped().unwrap());
         }
     }
 }

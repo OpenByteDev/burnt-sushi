@@ -7,7 +7,6 @@ use std::{
     mem::{self, MaybeUninit},
     os::windows::prelude::{AsRawHandle, FromRawHandle, IntoRawHandle, OwnedHandle},
     ptr,
-    sync::Mutex,
 };
 
 use dll_syringe::process::{OwnedProcess, Process};
@@ -24,7 +23,7 @@ use winapi::{
     },
 };
 
-use crate::APP_NAME_WITH_VERSION;
+use crate::{APP_NAME_WITH_VERSION, logger::SimpleLog};
 
 use super::raw;
 
@@ -33,12 +32,11 @@ pub struct Console(ConsoleImpl);
 
 #[derive(Debug)]
 enum ConsoleImpl {
-    None,
     Attach,
     Alloc,
     Piped {
         process: OwnedProcess,
-        pipe: Mutex<File>,
+        pipe: File,
     },
 }
 
@@ -51,10 +49,6 @@ impl Console {
     pub fn alloc() -> Option<Self> {
         raw::alloc().then(|| Self(ConsoleImpl::Alloc))
     }
-    pub fn none() -> Self {
-        Self(ConsoleImpl::None)
-    }
-
     pub fn piped() -> io::Result<Self> {
         let mut security_attributes = SECURITY_ATTRIBUTES {
             nLength: mem::size_of::<SECURITY_ATTRIBUTES>() as _,
@@ -132,20 +126,15 @@ impl Console {
         unsafe { CloseHandle(process_info.hThread) };
 
         let process = unsafe { OwnedProcess::from_raw_handle(process_info.hProcess) };
-        let pipe = Mutex::new(File::from(child_stdin_write_pipe));
+        let pipe = File::from(child_stdin_write_pipe);
         Ok(Self(ConsoleImpl::Piped { process, pipe }))
     }
 
     pub fn is_active(&self) -> bool {
         match &self.0 {
-            ConsoleImpl::None => false,
-            ConsoleImpl::Attach => true,
-            ConsoleImpl::Alloc => true,
+            ConsoleImpl::Attach | ConsoleImpl::Alloc => true,
             ConsoleImpl::Piped { process, .. } => process.is_alive(),
         }
-    }
-    pub fn is_none(&self) -> bool {
-        matches!(self.0, ConsoleImpl::None)
     }
     pub fn is_attached(&self) -> bool {
         matches!(self.0, ConsoleImpl::Attach | ConsoleImpl::Alloc)
@@ -154,20 +143,25 @@ impl Console {
         matches!(self.0, ConsoleImpl::Piped { .. })
     }
 
-    pub fn println(&self, s: impl Display) -> io::Result<()> {
-        match &self.0 {
-            ConsoleImpl::None => {}
-            ConsoleImpl::Attach | ConsoleImpl::Alloc => println!("{s}"),
-            ConsoleImpl::Piped { pipe, .. } => writeln!(pipe.lock().unwrap(), "{s}")?,
+    pub fn println(&mut self, message: impl Display) -> io::Result<()> {
+        match &mut self.0 {
+            ConsoleImpl::Attach | ConsoleImpl::Alloc => println!("{message}"),
+            ConsoleImpl::Piped { pipe, .. } => writeln!(pipe, "{message}")?,
         }
         Ok(())
+    }
+}
+
+impl SimpleLog for Console {
+    fn log(&mut self, message: &str) {
+        self.println(message).unwrap()
     }
 }
 
 impl Drop for Console {
     fn drop(&mut self) {
         match self.0 {
-            ConsoleImpl::None | ConsoleImpl::Attach => {}
+            ConsoleImpl::Attach => {}
             ConsoleImpl::Alloc => raw::free(),
             ConsoleImpl::Piped { ref process, .. } => {
                 let _ = process.kill();

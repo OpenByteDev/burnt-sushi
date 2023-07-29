@@ -18,9 +18,9 @@ use winapi::{
     um::{processthreadsapi::OpenProcess, synchapi::WaitForSingleObject, winnt::PROCESS_TERMINATE},
 };
 
-use std::{env, io, os::windows::prelude::FromRawHandle, time::Duration};
+use std::{env, io, os::windows::prelude::FromRawHandle, time::Duration, path::PathBuf};
 
-use crate::{args::ARGS, blocker::SpotifyAdBlocker, logger::Console, named_mutex::NamedMutex};
+use crate::{args::{ARGS, LogLevel}, blocker::SpotifyAdBlocker, named_mutex::NamedMutex, logger::{Console, FileLog}};
 
 mod args;
 mod blocker;
@@ -46,15 +46,27 @@ async fn main() {
     log::set_max_level(ARGS.log_level.into_level_filter());
 
     if let Some(console) = Console::attach() {
-        logger::global::get().set_console(console);
+        logger::global::get().console = Some(console);
         debug!("Attached to console");
     }
 
     if ARGS.console {
         if let Some(console) = Console::alloc() {
-            logger::global::get().set_console(console);
+            logger::global::get().console = Some(console);
             debug!("Allocated new console");
         }
+    }
+
+    let mut log_file = ARGS.log_file.clone();
+    if log_file.is_none() && ARGS.log_level == LogLevel::Debug {
+
+        let mut auto_log_file = env::current_exe().unwrap_or_else(|_| PathBuf::from("./BurntSushi.exe"));
+        let ext = auto_log_file.extension().map_or("log".to_string(), |ext| format!("{}.log", ext.to_str().unwrap()));
+        auto_log_file.set_extension(&ext);
+        log_file = Some(auto_log_file);
+    }
+    if let Some(log_file) = log_file {
+        logger::global::get().file = Some(FileLog::new(log_file));
     }
 
     info!("{}", APP_NAME_WITH_VERSION);

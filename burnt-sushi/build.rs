@@ -12,8 +12,6 @@ fn main() {
     res.set("CompanyName", "OpenByte");
     res.compile().unwrap();
 
-    // embed_resource::compile("resources.rc");
-
     fs::copy(
         build_crate(
             "burnt-sushi-blocker",
@@ -34,6 +32,7 @@ fn main() {
 }
 
 fn build_crate(name: &str, target: &str, file: &str) -> PathBuf {
+    // TODO: use encargo
     let cargo_exe = PathBuf::from(env::var_os("CARGO").unwrap());
     let is_release = env::var("PROFILE").unwrap().eq_ignore_ascii_case("release");
     let mut crate_dir = PathBuf::from(env::var_os("CARGO_MANIFEST_DIR").unwrap());

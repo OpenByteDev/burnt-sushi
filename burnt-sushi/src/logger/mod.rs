@@ -1,8 +1,10 @@
-mod console;
 pub mod global;
-mod logger;
-#[allow(dead_code)]
-pub mod raw;
+pub mod console;
+pub mod file;
+pub mod noop;
 
-pub use console::*;
-pub use logger::*;
+mod traits;
+
+pub use traits::*;
+pub use console::Console;
+pub use file::FileLog;

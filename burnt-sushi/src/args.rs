@@ -6,7 +6,7 @@ use crate::logger;
 
 pub static ARGS: LazyLock<Args> = LazyLock::new(|| {
     // Try to attach console for printing errors during argument parsing.
-    logger::raw::attach();
+    logger::console::raw::attach();
 
     Args::parse()
 });
@@ -21,6 +21,10 @@ pub struct Args {
     /// Level of debug output.
     #[arg(long, value_enum, default_value = "debug")]
     pub log_level: LogLevel,
+
+    /// Path to a log file to write to.
+    #[arg(long)]
+    pub log_file: Option<PathBuf>,
 
     /// Start a new instance of this app even if one is already running.
     #[arg(long)]
@@ -61,7 +65,7 @@ pub struct Args {
     pub force_restart: bool,
 }
 
-#[derive(ValueEnum, Clone, Copy, Debug)]
+#[derive(ValueEnum, Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord)]
 pub enum LogLevel {
     Off,
     Trace,
