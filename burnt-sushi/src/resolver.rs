@@ -16,7 +16,7 @@ pub async fn resolve_blocker(provided_path: Option<&Path>) -> io::Result<PathBuf
         check_len: bool,
         write_if_absent: bool,
     ) -> io::Result<()> {
-        let payload_bytes = include_bytes!(concat!(env!("OUT_DIR"), "\\BurntSushiBlocker_x86.dll"));
+        let payload_bytes = include_bytes!(concat!(env!("OUT_DIR"), "\\BurntSushiBlocker_x64.dll"));
 
         debug!("Looking for blocker at '{}'", path.display());
         if let Ok(metadata) = tokio::fs::metadata(path).await {

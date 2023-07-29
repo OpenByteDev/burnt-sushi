@@ -36,7 +36,7 @@ const APP_NAME: &str = "BurntSushi";
 const APP_AUTHOR: &str = "OpenByteDev";
 const APP_VERSION: &str = env!("CARGO_PKG_VERSION");
 const APP_NAME_WITH_VERSION: &str = concat!("BurntSushi v", env!("CARGO_PKG_VERSION"));
-const DEFAULT_BLOCKER_FILE_NAME: &str = "BurntSushiBlocker_x86.dll";
+const DEFAULT_BLOCKER_FILE_NAME: &str = "BurntSushiBlocker_x64.dll";
 const DEFAULT_FILTER_FILE_NAME: &str = "filter.toml";
 
 #[tokio::main(flavor = "current_thread")]

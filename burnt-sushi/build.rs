@@ -15,10 +15,10 @@ fn main() {
     fs::copy(
         build_crate(
             "burnt-sushi-blocker",
-            "i686-pc-windows-msvc",
+            "x86_64-pc-windows-msvc",
             "burnt_sushi_blocker.dll",
         ),
-        PathBuf::from(env::var_os("OUT_DIR").unwrap()).join("BurntSushiBlocker_x86.dll"),
+        PathBuf::from(env::var_os("OUT_DIR").unwrap()).join("BurntSushiBlocker_x64.dll"),
     )
     .unwrap();
 
