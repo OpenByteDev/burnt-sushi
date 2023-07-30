@@ -41,8 +41,7 @@ impl FileLog {
             .open(&self.path)
             .context("Failed to open or create log file.")?;
 
-        dbg!();
-        if dbg!(dbg!(file.metadata().unwrap().len()) > 100 * 1024) {
+        if file.metadata().unwrap().len() > 10 * 1024 * 1024 /* 10mb */ {
             file = File::options()
                 .write(true)
                 .read(true)
@@ -55,7 +54,7 @@ impl FileLog {
             let mut truncated_contents = String::new();
             for (index, _) in contents.match_indices('\n') {
                 let succeeding = &contents[(index + 1)..];
-                if succeeding.len() > 10 * 1024 {
+                if succeeding.len() > 1 * 1024 * 1024 /* 1mb */ {
                     continue;
                 }
                 truncated_contents.push_str(succeeding);
