@@ -106,7 +106,7 @@ checksum = "a3e2c3daef883ecc1b5d58c15adae93470a91d425f3532ba1695849656af3fc1"
 
 [[package]]
 name = "burnt-sushi"
-version = "0.2.0"
+version = "0.3.0"
 dependencies = [
  "anyhow",
  "async-thread",
@@ -1395,7 +1395,7 @@ dependencies = [
 
 [[package]]
 name = "shared"
-version = "0.2.0"
+version = "0.3.0"
 dependencies = [
  "capnp",
  "capnpc",
