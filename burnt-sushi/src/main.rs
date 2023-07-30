@@ -18,7 +18,7 @@ use winapi::{
     um::{processthreadsapi::OpenProcess, synchapi::WaitForSingleObject, winnt::PROCESS_TERMINATE},
 };
 
-use std::{env, io, os::windows::prelude::FromRawHandle, time::Duration, path::PathBuf};
+use std::{env, io, os::windows::prelude::FromRawHandle, time::Duration};
 
 use crate::{args::{ARGS, LogLevel}, blocker::SpotifyAdBlocker, named_mutex::NamedMutex, logger::{Console, FileLog}};
 
@@ -59,11 +59,13 @@ async fn main() {
 
     let mut log_file = ARGS.log_file.clone();
     if log_file.is_none() && ARGS.log_level == LogLevel::Debug {
-
-        let mut auto_log_file = env::current_exe().unwrap_or_else(|_| PathBuf::from("./BurntSushi.exe"));
-        let ext = auto_log_file.extension().map_or("log".to_string(), |ext| format!("{}.log", ext.to_str().unwrap()));
-        auto_log_file.set_extension(&ext);
-        log_file = Some(auto_log_file);
+        let mut auto_log_file = dirs::data_dir();
+        if let Some(ref mut log_file) = auto_log_file {
+            log_file.push("OpenByte");
+            log_file.push("BurntSushi");
+            log_file.push("BurntSushi.log");
+        }
+        log_file = auto_log_file;
     }
     if let Some(log_file) = log_file {
         logger::global::get().file = Some(FileLog::new(log_file));

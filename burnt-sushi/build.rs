@@ -38,7 +38,6 @@ fn build_crate(name: &str, target: &str, file: &str) -> PathBuf {
     let mut crate_dir = PathBuf::from(env::var_os("CARGO_MANIFEST_DIR").unwrap());
     crate_dir.push("..");
     crate_dir.push(name);
-    cargo_emit::rerun_if_changed!("..\\{}", name);
 
     let mut command = Command::new(cargo_exe);
 
