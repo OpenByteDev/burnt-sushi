@@ -20,7 +20,12 @@ use winapi::{
 
 use std::{env, io, os::windows::prelude::FromRawHandle, time::Duration};
 
-use crate::{args::{ARGS, LogLevel}, blocker::SpotifyAdBlocker, named_mutex::NamedMutex, logger::{Console, FileLog}};
+use crate::{
+    args::{LogLevel, ARGS},
+    blocker::SpotifyAdBlocker,
+    logger::{Console, FileLog},
+    named_mutex::NamedMutex,
+};
 
 mod args;
 mod blocker;

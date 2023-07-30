@@ -88,7 +88,7 @@ impl SpotifyHookState {
 
         match spotify.process.pid().ok() {
             Some(pid) => info!("Found Spotify (PID={pid})"),
-            None => info!("Found Spotify")
+            None => info!("Found Spotify"),
         }
         let syringe = Syringe::for_process(spotify.process);
 
@@ -116,7 +116,7 @@ impl SpotifyHookState {
             info!("Ejecting previous blocker...");
             match syringe.eject(prev_payload) {
                 Ok(_) => info!("Ejected previous blocker"),
-                Err(_) => error!("Failed to eject previous blocker")
+                Err(_) => error!("Failed to eject previous blocker"),
             };
         }
 
@@ -131,7 +131,8 @@ impl SpotifyHookState {
             .context("Failed to resolve blocker.")?;
 
         info!("Injecting blocker...");
-        let payload = syringe.inject(payload_path)
+        let payload = syringe
+            .inject(payload_path)
             .context("Failed to inject blocker.")?;
 
         debug!("Starting RPC...");

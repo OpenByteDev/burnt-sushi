@@ -12,7 +12,7 @@ pub mod rpc {
     pub use super::spotify_ad_guard_capnp::*;
 }
 
-#[allow(clippy::derive_hash_xor_eq)]
+#[allow(clippy::derived_hash_with_manual_eq)]
 impl hash::Hash for rpc::blocker_service::FilterHook {
     fn hash<H: hash::Hasher>(&self, state: &mut H) {
         core::mem::discriminant(self).hash(state)

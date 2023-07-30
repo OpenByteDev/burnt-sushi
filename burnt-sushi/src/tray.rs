@@ -121,7 +121,7 @@ impl SystemTrayIcon {
 
     fn show_console(&self) {
         let mut l = logger::global::get();
-        if !l.console.is_some() {
+        if l.console.is_none() {
             l.console = Some(Console::piped().unwrap());
         }
     }

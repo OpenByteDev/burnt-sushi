@@ -23,7 +23,7 @@ use winapi::{
     },
 };
 
-use crate::{APP_NAME_WITH_VERSION, logger::SimpleLog};
+use crate::{logger::SimpleLog, APP_NAME_WITH_VERSION};
 
 use super::raw;
 
@@ -34,10 +34,7 @@ pub struct Console(ConsoleImpl);
 enum ConsoleImpl {
     Attach,
     Alloc,
-    Piped {
-        process: OwnedProcess,
-        pipe: File,
-    },
+    Piped { process: OwnedProcess, pipe: File },
 }
 
 unsafe impl Send for Console {}

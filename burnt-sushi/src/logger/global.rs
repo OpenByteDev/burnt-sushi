@@ -1,11 +1,13 @@
-use std::{sync::{Mutex, MutexGuard}, fmt::Debug};
+use std::{
+    fmt::Debug,
+    sync::{Mutex, MutexGuard},
+};
 
 use log::Log;
 
 use crate::APP_NAME;
 
-use super::{SimpleLog, Console, FileLog};
-
+use super::{Console, FileLog, SimpleLog};
 
 static LOGGER: GlobalLoggerHolder = GlobalLoggerHolder(Mutex::new(GlobalLogger::new()));
 
@@ -37,11 +39,10 @@ impl GlobalLogger {
     pub const fn new() -> Self {
         GlobalLogger {
             console: None,
-            file: None
+            file: None,
         }
     }
 }
-
 
 impl Log for GlobalLoggerHolder {
     fn enabled(&self, _metadata: &log::Metadata) -> bool {
