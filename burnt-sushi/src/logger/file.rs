@@ -54,7 +54,7 @@ impl FileLog {
             let mut truncated_contents = String::new();
             for (index, _) in contents.match_indices('\n') {
                 let succeeding = &contents[(index + 1)..];
-                if succeeding.len() > 1 * 1024 * 1024 /* 1mb */ {
+                if succeeding.len() > 1024 * 1024 /* 1mb */ {
                     continue;
                 }
                 truncated_contents.push_str(succeeding);
