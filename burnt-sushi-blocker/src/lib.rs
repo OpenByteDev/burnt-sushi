@@ -13,7 +13,7 @@ use capnp_rpc::{pry, rpc_twoparty_capnp, twoparty, RpcSystem};
 use enum_map::EnumMap;
 use futures::{AsyncReadExt, FutureExt};
 use hooks::LogParams;
-use regex::Regex;
+use regex::RegexSet;
 use tokio::select;
 
 mod cef;
@@ -196,14 +196,14 @@ impl LoggerManager {
 
 #[derive(Debug, Clone, Default)]
 pub struct FilterRuleset {
-    whitelist: Vec<Regex>,
-    blacklist: Vec<Regex>,
+    whitelist: RegexSet,
+    blacklist: RegexSet,
 }
 
 impl FilterRuleset {
     fn check(&self, request: &str) -> bool {
-        (self.whitelist.is_empty() || self.whitelist.iter().any(|regex| regex.is_match(request)))
-            && !self.blacklist.iter().any(|regex| regex.is_match(request))
+        (self.whitelist.is_empty() || self.whitelist.is_match(request))
+            && !self.blacklist.is_match(request)
     }
 }
 
@@ -247,18 +247,20 @@ impl shared::rpc::blocker_service::Server for ServerImpl {
             let ruleset = &mut Arc::get_mut(&mut self.filters).ok_or_else(|| {
                 ::capnp::Error::failed("cannot modify filters while in use".to_string())
             })?[hook];
-            for i in 0..whitelist.len() {
-                ruleset.whitelist.push(
-                    Regex::new(&String::from_utf8_lossy(whitelist.get(i)?.as_bytes()))
-                        .map_err(|e| capnp::Error::failed(e.to_string()))?,
-                );
-            }
-            for i in 0..blacklist.len() {
-                ruleset.blacklist.push(
-                    Regex::new(&String::from_utf8_lossy(blacklist.get(i)?.as_bytes()))
-                        .map_err(|e| capnp::Error::failed(e.to_string()))?,
-                );
-            }
+            ruleset.whitelist = RegexSet::new(
+                whitelist
+                    .iter()
+                    .map(|pattern| pattern.map(|p| String::from_utf8_lossy(p.as_bytes())))
+                    .collect::<Result<Vec<_>, _>>()?,
+            )
+            .map_err(|e| capnp::Error::failed(e.to_string()))?;
+            ruleset.blacklist = RegexSet::new(
+                blacklist
+                    .iter()
+                    .map(|pattern| pattern.map(|p| String::from_utf8_lossy(p.as_bytes())))
+                    .collect::<Result<Vec<_>, _>>()?,
+            )
+            .map_err(|e| capnp::Error::failed(e.to_string()))?;
 
             Ok::<(), capnp::Error>(())
         })());
