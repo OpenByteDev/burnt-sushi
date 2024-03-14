@@ -3,7 +3,6 @@
     lazy_cell,
     maybe_uninit_uninit_array,
     maybe_uninit_slice,
-    io_error_other,
     iter_intersperse
 )]
 #![warn(unsafe_op_in_unsafe_fn)]
