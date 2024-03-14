@@ -148,7 +148,7 @@ impl LoggerManager {
             let mut builder = req.get().init_request();
             builder.set_hook(hook);
             builder.set_blocked(blocked);
-            builder.set_url(url.as_ref());
+            builder.set_url(url);
             req.send().promise
         }));
         drop(loggers);
@@ -160,7 +160,7 @@ impl LoggerManager {
         let loggers = self.loggers.borrow();
         let futures = futures::future::join_all(loggers.iter().map(|logger| {
             let mut req = logger.log_message_request();
-            req.get().set_message(message.as_ref());
+            req.get().set_message(message);
             req.send().promise
         }));
         drop(loggers);
@@ -249,13 +249,13 @@ impl shared::rpc::blocker_service::Server for ServerImpl {
             })?[hook];
             for i in 0..whitelist.len() {
                 ruleset.whitelist.push(
-                    Regex::new(whitelist.get(i)?)
+                    Regex::new(&String::from_utf8_lossy(whitelist.get(i)?.as_bytes()))
                         .map_err(|e| capnp::Error::failed(e.to_string()))?,
                 );
             }
             for i in 0..blacklist.len() {
                 ruleset.blacklist.push(
-                    Regex::new(blacklist.get(i)?)
+                    Regex::new(&String::from_utf8_lossy(blacklist.get(i)?.as_bytes()))
                         .map_err(|e| capnp::Error::failed(e.to_string()))?,
                 );
             }

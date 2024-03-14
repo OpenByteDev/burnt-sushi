@@ -11,8 +11,8 @@ keywords = ["spotify", "adblocker", "windows", "blocker", "payload"]
 
 [dependencies]
 dll-syringe = { version = "0.15.2", features = ["payload-utils"], default-features = true }
-capnp = { version = "0.17.2", default-features = false }
-capnp-rpc = { version = "0.17.0", default-features = false }
+capnp = { version = "0.19.2", features = ["alloc"], default-features = false }
+capnp-rpc = { version = "0.19.0", default-features = false }
 futures = { version = "0.3.28", default-features = false }
 tokio = { version = "1.29.1", features = ["net", "rt", "macros", "sync"], default-features = false }
 tokio-util = { version = "0.7.8", features = ["compat"], default-features = false }

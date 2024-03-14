@@ -11,15 +11,15 @@ keywords = ["spotify", "adblocker", "windows", "blocker"]
 
 [dependencies]
 dll-syringe = { version = "0.15.2", features = ["into-x86-from-x64", "rpc"], default-features = false }
-capnp = { version = "0.17.2", default-features = false }
-capnp-rpc = { version = "0.17.0", default-features = false }
-toml = { version = "0.7.6", features = ["parse"], default-features = false }
+capnp = { version = "0.19.2", features = ["alloc"], default-features = false }
+capnp-rpc = { version = "0.19.0", default-features = false }
+toml = { version = "0.8.11", features = ["parse"], default-features = false }
 serde = { version = "1.0.171", features = ["derive"], default-features = false }
 futures = { version = "0.3.28", default-features = false }
 tokio = { version = "1.29.1", features = ["net", "rt", "macros", "fs", "sync"], default-features = false }
 tokio-util = { version = "0.7.8", features = ["compat"], default-features = false }
 winapi = { version = "0.3.9", features = ["winuser", "tlhelp32"], default-features = false }
-wineventhook = { version = "0.8.0", default-features = false }
+wineventhook = { version = "0.9.0", default-features = false }
 project-uninit = { version = "0.1.1", default-features = false }
 fallible-iterator = { version = "0.3.0", default-features = false }
 async-thread = { version = "0.1.2", default-features = false }
@@ -32,7 +32,7 @@ widestring = { version = "1.0.2", default-features = false }
 ctrlc = { version = "3.4.0", default-features = false }
 clap = { version = "4.3.11", default-features = false, features = ["std", "derive", "help"] }
 is_elevated = { version = "0.1.2", default-features = false }
-self_update = { version = "0.37.0", default-features = false, features = ["rustls", "archive-zip"] }
+self_update = { version = "0.39.0", default-features = false, features = ["rustls", "archive-zip"] }
 winrt-toast = { version = "0.1.1", default-features = false }
 faccess = { version = "0.2.4", default-features = false }
 semver = { version = "1.0.17", default-features = false }

@@ -20,7 +20,7 @@ impl shared::rpc::blocker_service::logger::Server for LoggerImpl {
         let hook_name = pry!(request.get_hook());
         let url = pry!(request.get_url());
 
-        debug!("[{}] ({}) {}", block_sign, hook_name, url);
+        debug!("[{}] ({}) {}", block_sign, hook_name, String::from_utf8_lossy(url.as_bytes()));
 
         Promise::ok(())
     }
@@ -31,7 +31,7 @@ impl shared::rpc::blocker_service::logger::Server for LoggerImpl {
         mut _results: shared::rpc::blocker_service::logger::LogMessageResults,
     ) -> Promise<(), ::capnp::Error> {
         let message = pry!(pry!(params.get()).get_message());
-        info!("{}", message);
+        info!("{}", String::from_utf8_lossy(message.as_bytes()));
 
         Promise::ok(())
     }
