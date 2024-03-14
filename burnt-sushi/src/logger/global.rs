@@ -1,7 +1,9 @@
 use std::{
     fmt::Debug,
-    sync::{Mutex, MutexGuard},
+    sync::{Mutex, MutexGuard}
 };
+
+use chrono::Local;
 
 use log::Log;
 
@@ -54,13 +56,14 @@ impl Log for GlobalLoggerHolder {
             return;
         }
 
-        let message = format!("[{}] {}", record.level(), record.args());
-
         let mut logger = self.0.lock().unwrap();
         if let Some(log) = &mut logger.console {
+            let message = format!("[{}] {}", record.level(), record.args());
             log.log(&message);
         }
         if let Some(log) = &mut logger.file {
+            let date_time = Local::now().format("%Y-%m-%d %H:%M:%S");
+            let message = format!("{} [{}] {}", date_time, record.level(), record.args());
             log.log(&message);
         }
     }

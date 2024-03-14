@@ -42,6 +42,7 @@ u16cstr = { version = "0.4.0", default-features = false }
 reqwest = { version = "0.11.18", default-features = false }
 anyhow = { version = "1.0.71", default-features = false, features = ["std", "backtrace"] }
 dirs = { version = "5.0.1", default-features = false }
+chrono = { version = "0.4.26", default-features = false, features = ["std", "clock"]}
 
 [build-dependencies]
 cargo-emit = "0.2.1"
