@@ -267,9 +267,8 @@ fn is_main_spotify_window(window: WindowHandle) -> bool {
     }
 
     let class_name = get_window_class_name(window);
-
     match class_name {
-        Ok(name) => name == "Chrome_WidgetWin_0",
+        Ok(name) => name.starts_with("Chrome_WidgetWin"),
         Err(_) => false,
     }
 }
