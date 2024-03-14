@@ -50,9 +50,11 @@ async fn main() {
 
     log::set_max_level(ARGS.log_level.into_level_filter());
 
-    if let Some(console) = Console::attach() {
-        logger::global::get().console = Some(console);
-        debug!("Attached to console");
+    if !ARGS.no_attach {
+        if let Some(console) = Console::attach() {
+            logger::global::get().console = Some(console);
+            debug!("Attached to console");
+        }
     }
 
     if ARGS.console {

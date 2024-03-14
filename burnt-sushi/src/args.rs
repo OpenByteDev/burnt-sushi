@@ -18,6 +18,11 @@ pub struct Args {
     #[arg(long)]
     pub console: bool,
 
+    /// Do not attach to a parent console to show debug output.
+    #[arg(long)]
+    #[arg(conflicts_with("console"))]
+    pub no_attach: bool,
+
     /// Level of debug output.
     #[arg(long, value_enum, default_value = "debug")]
     pub log_level: LogLevel,
