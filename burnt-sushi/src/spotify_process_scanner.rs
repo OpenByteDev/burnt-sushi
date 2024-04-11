@@ -144,8 +144,12 @@ impl SpotifyProcessScanner {
         while let Some(event) = event_rx.recv().await {
             // scoped to make future Send
             let state = {
-                let window = event.window_handle().unwrap();
-                let process = get_window_process(window)?;
+                let Some(window) = event.window_handle() else {
+                    continue;
+                };
+                let Ok(process) = get_window_process(window) else {
+                    continue;
+                };
                 if !is_spotify_process(process.borrowed()) || !is_main_spotify_window(window) {
                     continue;
                 }
