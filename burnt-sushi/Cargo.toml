@@ -11,38 +11,38 @@ keywords = ["spotify", "adblocker", "windows", "blocker"]
 
 [dependencies]
 dll-syringe = { version = "0.15.2", features = ["into-x86-from-x64", "rpc"], default-features = false }
-capnp = { version = "0.19.2", features = ["alloc"], default-features = false }
-capnp-rpc = { version = "0.19.0", default-features = false }
-toml = { version = "0.8.11", features = ["parse"], default-features = false }
-serde = { version = "1.0.171", features = ["derive"], default-features = false }
-futures = { version = "0.3.28", default-features = false }
-tokio = { version = "1.29.1", features = ["net", "rt", "macros", "fs", "sync"], default-features = false }
-tokio-util = { version = "0.7.8", features = ["compat"], default-features = false }
+capnp = { version = "0.19.6", features = ["alloc"], default-features = false }
+capnp-rpc = { version = "0.19.2", default-features = false }
+toml = { version = "0.8.14", features = ["parse"], default-features = false }
+serde = { version = "1.0.204", features = ["derive"], default-features = false }
+futures = { version = "0.3.30", default-features = false }
+tokio = { version = "1.38.1", features = ["net", "rt", "macros", "fs", "sync"], default-features = false }
+tokio-util = { version = "0.7.11", features = ["compat"], default-features = false }
 winapi = { version = "0.3.9", features = ["winuser", "tlhelp32"], default-features = false }
 wineventhook = { version = "0.9.0", default-features = false }
 project-uninit = { version = "0.1.1", default-features = false }
 fallible-iterator = { version = "0.3.0", default-features = false }
 async-thread = { version = "0.1.2", default-features = false }
-log = { version = "0.4.19", default-features = false }
+log = { version = "0.4.22", default-features = false }
 shared = { path = "../shared", default-features = false }
 native-windows-gui = { version = "1.0.13", default-features = false, features = ["tray-notification", "message-window", "menu", "cursor", "image-decoder", "embed-resource"] }
 native-windows-derive = { version = "1.0.5", default-features = false }
 pipedconsole = { version = "0.3.2", default-features = false }
-widestring = { version = "1.0.2", default-features = false }
-ctrlc = { version = "3.4.0", default-features = false }
-clap = { version = "4.3.11", default-features = false, features = ["std", "derive", "help"] }
+widestring = { version = "1.1.0", default-features = false }
+ctrlc = { version = "3.4.4", default-features = false }
+clap = { version = "4.5.9", default-features = false, features = ["std", "derive", "help"] }
 is_elevated = { version = "0.1.2", default-features = false }
-self_update = { version = "0.39.0", default-features = false, features = ["rustls", "archive-zip"] }
+self_update = { version = "0.41.0", default-features = false, features = ["rustls", "archive-zip"] }
 winrt-toast = { version = "0.1.1", default-features = false }
 faccess = { version = "0.2.4", default-features = false }
-semver = { version = "1.0.17", default-features = false }
+semver = { version = "1.0.23", default-features = false }
 lenient_semver = { version = "0.4.2", default-features = false, features = ["semver"] }
-tempfile = { version = "3.6.0", default-features = false }
+tempfile = { version = "3.10.1", default-features = false }
 u16cstr = { version = "0.4.0", default-features = false }
-reqwest = { version = "0.11.18", default-features = false }
-anyhow = { version = "1.0.71", default-features = false, features = ["std", "backtrace"] }
+reqwest = { version = "0.12.5", default-features = false }
+anyhow = { version = "1.0.86", default-features = false, features = ["std", "backtrace"] }
 dirs = { version = "5.0.1", default-features = false }
-chrono = { version = "0.4.26", default-features = false, features = ["std", "clock"]}
+chrono = { version = "0.4.38", default-features = false, features = ["std", "clock"] }
 
 [build-dependencies]
 cargo-emit = "0.2.1"
