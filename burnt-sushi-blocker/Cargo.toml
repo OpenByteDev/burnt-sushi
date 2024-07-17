@@ -24,7 +24,7 @@ enum-map = { version = "2.6.0", default-features = false }
 u16cstr = { version = "0.4.0", default-features = false }
 
 [lib]
-crate_type = ["cdylib"]
+crate-type = ["cdylib"]
 
 [profile.release]
 strip = true  # Automatically strip symbols from the binary.

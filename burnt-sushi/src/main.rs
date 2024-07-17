@@ -1,6 +1,5 @@
 #![feature(
     once_cell_try,
-    lazy_cell,
     maybe_uninit_uninit_array,
     maybe_uninit_slice,
     iter_intersperse

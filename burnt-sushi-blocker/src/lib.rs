@@ -1,4 +1,4 @@
-#![feature(once_cell_try, lazy_cell)]
+#![feature(once_cell_try)]
 
 use std::{
     cell::{OnceCell, RefCell},
