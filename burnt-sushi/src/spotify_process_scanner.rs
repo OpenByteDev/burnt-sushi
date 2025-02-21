@@ -270,11 +270,12 @@ fn is_main_spotify_window(window: WindowHandle) -> bool {
         return false;
     }
 
-    let class_name = get_window_class_name(window);
-    match class_name {
-        Ok(name) => name.starts_with("Chrome_WidgetWin"),
-        Err(_) => false,
-    }
+    let class_name = match get_window_class_name(window) {
+        Ok(class_name) => class_name,
+        _ => return false,
+    };
+
+    class_name.starts_with("Chrome_WidgetWin") || class_name == "Chrome_RenderWidgetHostHWND"
 }
 
 fn get_window_class_name(window: WindowHandle) -> io::Result<String> {
