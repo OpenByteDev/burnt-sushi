@@ -5,9 +5,8 @@ use std::{
     os::windows::prelude::{AsRawHandle, HandleOrInvalid, OwnedHandle},
     ptr,
 };
-
+use log::info;
 use dll_syringe::process::{OwnedProcess, Process};
-
 use fallible_iterator::FallibleIterator;
 use project_uninit::partial_init;
 use winapi::{
@@ -270,11 +269,14 @@ fn is_main_spotify_window(window: WindowHandle) -> bool {
         return false;
     }
 
-    let class_name = get_window_class_name(window);
-    match class_name {
-        Ok(name) => name.starts_with("Chrome_WidgetWin"),
-        Err(_) => false,
-    }
+    let class_name = match get_window_class_name(window) {
+        Ok(class_name) => class_name,
+        _ => return false,
+    };
+    info!("Found window '{title}' of class '{class_name}'.");
+    class_name.starts_with("Chrome_WidgetWin") 
+    || class_name == "Chrome_RenderWidgetHostHWND" 
+    || class_name == "GDI+ Hook Window Class"
 }
 
 fn get_window_class_name(window: WindowHandle) -> io::Result<String> {
