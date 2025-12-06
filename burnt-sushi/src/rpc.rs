@@ -1,4 +1,6 @@
-use ::capnp::capability::Promise;
+use std::rc::Rc;
+
+use capnp::capability::Promise;
 use capnp_rpc::{pry, rpc_twoparty_capnp, twoparty, RpcSystem};
 use futures::{AsyncReadExt, FutureExt};
 use log::{debug, info};
@@ -10,26 +12,31 @@ struct LoggerImpl;
 
 impl shared::rpc::blocker_service::logger::Server for LoggerImpl {
     fn log_request(
-        &mut self,
+        self: Rc<Self>,
         params: shared::rpc::blocker_service::logger::LogRequestParams,
         mut _results: shared::rpc::blocker_service::logger::LogRequestResults,
-    ) -> Promise<(), ::capnp::Error> {
+    ) -> impl futures::Future<Output = Result<(), capnp::Error>> + 'static {
         let request = pry!(pry!(params.get()).get_request());
 
         let block_sign = if request.get_blocked() { '-' } else { '+' };
         let hook_name = pry!(request.get_hook());
         let url = pry!(request.get_url());
 
-        debug!("[{}] ({}) {}", block_sign, hook_name, String::from_utf8_lossy(url.as_bytes()));
+        debug!(
+            "[{}] ({}) {}",
+            block_sign,
+            hook_name,
+            String::from_utf8_lossy(url.as_bytes())
+        );
 
         Promise::ok(())
     }
 
     fn log_message(
-        &mut self,
+        self: Rc<Self>,
         params: shared::rpc::blocker_service::logger::LogMessageParams,
         mut _results: shared::rpc::blocker_service::logger::LogMessageResults,
-    ) -> Promise<(), ::capnp::Error> {
+    ) -> impl futures::Future<Output = Result<(), capnp::Error>> + 'static {
         let message = pry!(pry!(params.get()).get_message());
         info!("{}", String::from_utf8_lossy(message.as_bytes()));
 

@@ -2,23 +2,23 @@
 name = "shared"
 version = "0.3.2"
 description = "Spotify AdBlocker for Windows"
-readme = "../README.md"
 repository = "https://github.com/OpenByteDev/burnt-sushi"
 license = "MIT"
 authors = ["OpenByte <development.openbyte@gmail.com>"]
-edition = "2021"
+edition = "2024"
 keywords = ["spotify", "adblocker", "windows", "blocker", "payload"]
 
 [dependencies]
-capnp = { version = "0.19.6", features = ["alloc"], default-features = false }
+capnp = { version = "0.23.0", features = ["alloc"], default-features = false }
 regex = { version = "1.10.5", features = ["std"], default-features = false }
 enum-map = { version = "2.7.3", default-features = false }
 
 [build-dependencies]
-capnpc = "0.19.0"
+capnpc = "0.23.0"
 cargo-emit = "0.2.1"
 
 [profile.release]
-strip = true  # Automatically strip symbols from the binary.
+strip = true
 lto = true
 opt-level = 3
+codegen-units = 1

@@ -3,22 +3,24 @@
 use std::{
     cell::{OnceCell, RefCell},
     net::{Ipv4Addr, SocketAddrV4},
-    sync::LazyLock,
-    sync::{Arc, Mutex},
+    rc::Rc,
+    sync::{LazyLock, Mutex},
     thread,
 };
 
 use capnp::capability::Promise;
-use capnp_rpc::{pry, rpc_twoparty_capnp, twoparty, RpcSystem};
-use enum_map::EnumMap;
+use capnp_rpc::{RpcSystem, pry, rpc_twoparty_capnp, twoparty};
+use dll_syringe::payload_utils::payload_procedure;
 use futures::{AsyncReadExt, FutureExt};
 use hooks::LogParams;
 use regex::RegexSet;
 use tokio::select;
 
 mod cef;
+mod filters;
 mod hooks;
 mod utils;
+pub use filters::*;
 
 static RPC_STATE: LazyLock<Mutex<Option<RpcState>>> = LazyLock::new(|| Mutex::new(None));
 
@@ -28,42 +30,43 @@ struct RpcState {
     socket_addr: SocketAddrV4,
 }
 
-dll_syringe::payload_procedure! {
-    fn start_rpc() -> SocketAddrV4 {
-        let mut state = RPC_STATE.lock().unwrap();
-        if let Some(state) = state.as_ref() {
-            return state.socket_addr;
-        }
-
-        let (end_point_tx, end_point_rx) = tokio::sync::oneshot::channel();
-        let (disconnect_tx, disconnect_rx) = tokio::sync::watch::channel(());
-
-        let rpc_thread = thread::spawn(move || {
-            tokio::runtime::Builder::new_current_thread().enable_all().build().unwrap()
-                .block_on(tokio::task::LocalSet::new().run_until(run_rpc(end_point_tx, disconnect_rx)))
-                .unwrap()
-        });
-
-        let socket_addr = end_point_rx.blocking_recv().unwrap();
-
-        *state = Some(RpcState {
-            rpc_thread,
-            rpc_disconnector: disconnect_tx,
-            socket_addr,
-        });
-
-        socket_addr
+#[payload_procedure]
+fn start_rpc() -> SocketAddrV4 {
+    let mut state = RPC_STATE.lock().unwrap();
+    if let Some(state) = state.as_ref() {
+        return state.socket_addr;
     }
+
+    let (end_point_tx, end_point_rx) = tokio::sync::oneshot::channel();
+    let (disconnect_tx, disconnect_rx) = tokio::sync::watch::channel(());
+
+    let rpc_thread = thread::spawn(move || {
+        tokio::runtime::Builder::new_current_thread()
+            .enable_all()
+            .build()
+            .unwrap()
+            .block_on(tokio::task::LocalSet::new().run_until(run_rpc(end_point_tx, disconnect_rx)))
+            .unwrap()
+    });
+
+    let socket_addr = end_point_rx.blocking_recv().unwrap();
+
+    *state = Some(RpcState {
+        rpc_thread,
+        rpc_disconnector: disconnect_tx,
+        socket_addr,
+    });
+
+    socket_addr
 }
 
-dll_syringe::payload_procedure! {
-    fn stop_rpc() {
-        let mut state = RPC_STATE.lock().unwrap();
-        if let Some(state) = state.take() {
-            hooks::disable().unwrap();
-            state.rpc_disconnector.send(()).unwrap();
-            state.rpc_thread.join().unwrap();
-        }
+#[payload_procedure]
+fn stop_rpc() {
+    let mut state = RPC_STATE.lock().unwrap();
+    if let Some(state) = state.take() {
+        hooks::disable().unwrap();
+        state.rpc_disconnector.send(()).unwrap();
+        state.rpc_thread.join().unwrap();
     }
 }
 
@@ -194,39 +197,26 @@ impl LoggerManager {
     }
 }
 
-#[derive(Debug, Clone, Default)]
-pub struct FilterRuleset {
-    whitelist: RegexSet,
-    blacklist: RegexSet,
-}
-
-impl FilterRuleset {
-    fn check(&self, request: &str) -> bool {
-        (self.whitelist.is_empty() || self.whitelist.is_match(request))
-            && !self.blacklist.is_match(request)
-    }
-}
-
 struct ServerImpl {
     logger: LoggerManager,
-    filters: Arc<EnumMap<shared::rpc::blocker_service::FilterHook, FilterRuleset>>,
+    filters: Filters,
 }
 
 impl ServerImpl {
     fn new() -> Self {
         Self {
             logger: LoggerManager::new(),
-            filters: Arc::new(EnumMap::default()),
+            filters: Filters::empty(),
         }
     }
 }
 
 impl shared::rpc::blocker_service::Server for ServerImpl {
     fn register_logger(
-        &mut self,
+        self: Rc<Self>,
         params: shared::rpc::blocker_service::RegisterLoggerParams,
         mut _results: shared::rpc::blocker_service::RegisterLoggerResults,
-    ) -> Promise<(), ::capnp::Error> {
+    ) -> impl futures::Future<Output = Result<(), capnp::Error>> + 'static {
         self.logger
             .add_logger(pry!(pry!(params.get()).get_logger()));
 
@@ -234,33 +224,35 @@ impl shared::rpc::blocker_service::Server for ServerImpl {
     }
 
     fn set_ruleset(
-        &mut self,
+        self: Rc<Self>,
         params: shared::rpc::blocker_service::SetRulesetParams,
         mut _results: shared::rpc::blocker_service::SetRulesetResults,
-    ) -> Promise<(), ::capnp::Error> {
+    ) -> impl futures::Future<Output = Result<(), capnp::Error>> + 'static {
         pry!((move || {
             let hook = params.get()?.get_hook()?;
             let raw_ruleset = params.get()?.get_ruleset()?;
             let whitelist = raw_ruleset.get_whitelist()?;
             let blacklist = raw_ruleset.get_blacklist()?;
 
-            let ruleset = &mut Arc::get_mut(&mut self.filters).ok_or_else(|| {
-                ::capnp::Error::failed("cannot modify filters while in use".to_string())
-            })?[hook];
-            ruleset.whitelist = RegexSet::new(
+            let whitelist = RegexSet::new(
                 whitelist
                     .iter()
                     .map(|pattern| pattern.map(|p| String::from_utf8_lossy(p.as_bytes())))
                     .collect::<Result<Vec<_>, _>>()?,
             )
             .map_err(|e| capnp::Error::failed(e.to_string()))?;
-            ruleset.blacklist = RegexSet::new(
+            let blacklist = RegexSet::new(
                 blacklist
                     .iter()
                     .map(|pattern| pattern.map(|p| String::from_utf8_lossy(p.as_bytes())))
                     .collect::<Result<Vec<_>, _>>()?,
             )
             .map_err(|e| capnp::Error::failed(e.to_string()))?;
+            let ruleset = FilterRuleset {
+                whitelist,
+                blacklist,
+            };
+            self.filters.replace_ruleset(hook, ruleset);
 
             Ok::<(), capnp::Error>(())
         })());
@@ -269,10 +261,10 @@ impl shared::rpc::blocker_service::Server for ServerImpl {
     }
 
     fn enable_filtering(
-        &mut self,
+        self: Rc<Self>,
         _params: shared::rpc::blocker_service::EnableFilteringParams,
         mut _results: shared::rpc::blocker_service::EnableFilteringResults,
-    ) -> Promise<(), ::capnp::Error> {
+    ) -> impl futures::Future<Output = Result<(), capnp::Error>> + 'static {
         match hooks::enable(self.filters.clone(), self.logger.log_sender()) {
             Ok(()) => Promise::ok(()),
             Err(e) => Promise::err(capnp::Error::failed(e.to_string())),
@@ -280,10 +272,10 @@ impl shared::rpc::blocker_service::Server for ServerImpl {
     }
 
     fn disable_filtering(
-        &mut self,
+        self: Rc<Self>,
         _params: shared::rpc::blocker_service::DisableFilteringParams,
         mut _results: shared::rpc::blocker_service::DisableFilteringResults,
-    ) -> Promise<(), ::capnp::Error> {
+    ) -> impl futures::Future<Output = Result<(), capnp::Error>> + 'static {
         match hooks::disable() {
             Ok(()) => Promise::ok(()),
             Err(e) => Promise::err(capnp::Error::failed(e.to_string())),

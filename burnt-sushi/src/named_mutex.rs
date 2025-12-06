@@ -27,7 +27,7 @@ impl NamedMutex {
         }
     }
 
-    pub fn try_lock(&self) -> io::Result<Option<NamedMutexGuard>> {
+    pub fn try_lock(&'_ self) -> io::Result<Option<NamedMutexGuard<'_>>> {
         let rc = unsafe { WaitForSingleObject(self.0, 0) };
 
         if rc == WAIT_OBJECT_0 || rc == WAIT_ABANDONED {
@@ -39,7 +39,7 @@ impl NamedMutex {
         }
     }
 
-    pub fn lock(&self) -> io::Result<NamedMutexGuard> {
+    pub fn lock(&'_ self) -> io::Result<NamedMutexGuard<'_>> {
         let rc = unsafe { WaitForSingleObject(self.0, INFINITE) };
 
         if rc == WAIT_OBJECT_0 || rc == WAIT_ABANDONED {
@@ -53,7 +53,7 @@ impl NamedMutex {
         unsafe { self.new_guard() }.unlock()
     }
 
-    unsafe fn new_guard(&self) -> NamedMutexGuard {
+    unsafe fn new_guard(&'_ self) -> NamedMutexGuard<'_> {
         NamedMutexGuard(self.0, PhantomData)
     }
 }

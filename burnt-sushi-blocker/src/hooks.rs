@@ -1,15 +1,15 @@
-use std::{ffi::CStr, mem, panic::AssertUnwindSafe, ptr, slice, sync::Arc, sync::OnceLock};
+use std::{ffi::CStr, mem, panic::AssertUnwindSafe, ptr, slice, sync::OnceLock};
 
 use cef::*;
 use dll_syringe::process::OwnedProcessModule;
-use enum_map::EnumMap;
 use retour::static_detour;
+use shared::rpc::blocker_service::FilterHook;
 use winapi::{
     shared::{minwindef::INT, ntdef::PCSTR, ws2def::ADDRINFOA},
     um::winsock2::WSAHOST_NOT_FOUND,
 };
 
-use crate::{cef, utils::panic_info_to_string, FilterRuleset};
+use crate::{cef, filters::Filters, utils::panic_info_to_string};
 
 type GetAddrInfoFn =
     unsafe extern "system" fn(PCSTR, PCSTR, *const ADDRINFOA, *const *const ADDRINFOA) -> INT;
@@ -36,7 +36,7 @@ pub enum LogParams {
 }
 
 pub fn enable(
-    filters: Arc<EnumMap<shared::rpc::blocker_service::FilterHook, FilterRuleset>>,
+    filters: Filters,
     log_tx: tokio::sync::mpsc::UnboundedSender<LogParams>,
 ) -> Result<(), Box<dyn std::error::Error>> {
     static GET_ADDR_INFO_HOOK: OnceLock<()> = OnceLock::new();
@@ -64,7 +64,7 @@ pub fn disable() -> Result<(), Box<dyn std::error::Error>> {
 }
 
 fn init_get_addr_info_hook(
-    filters: Arc<EnumMap<shared::rpc::blocker_service::FilterHook, FilterRuleset>>,
+    filters: Filters,
     log_tx: tokio::sync::mpsc::UnboundedSender<LogParams>,
 ) -> Result<(), Box<dyn std::error::Error>> {
     let ws2 =
@@ -77,8 +77,7 @@ fn init_get_addr_info_hook(
             move |node_name, service_name, hints, result| {
                 let res = std::panic::catch_unwind(AssertUnwindSafe(|| {
                     let url = CStr::from_ptr(node_name).to_str().unwrap(); // TODO:
-                    let block =
-                        !filters[shared::rpc::blocker_service::FilterHook::GetAddrInfo].check(url);
+                    let block = !filters.check(FilterHook::CefUrlRequestCreate, &url);
 
                     let _ = log_tx.send(LogParams::Request {
                         hook: shared::rpc::blocker_service::FilterHook::GetAddrInfo,
@@ -110,7 +109,7 @@ fn init_get_addr_info_hook(
 }
 
 fn init_cef_urlrequest_create_hook(
-    filters: Arc<EnumMap<shared::rpc::blocker_service::FilterHook, FilterRuleset>>,
+    filters: Filters,
     log_tx: tokio::sync::mpsc::UnboundedSender<LogParams>,
 ) -> Result<(), Box<dyn std::error::Error>> {
     let libcef =
@@ -142,12 +141,10 @@ fn init_cef_urlrequest_create_hook(
                     let url = String::from_utf16_lossy(wide_url);
                     cef_string_userfree_utf16_free(cef_url);
 
-                    let block = !filters
-                        [shared::rpc::blocker_service::FilterHook::CefUrlRequestCreate]
-                        .check(&url);
+                    let block = !filters.check(FilterHook::CefUrlRequestCreate, &url);
 
                     let _ = log_tx.send(LogParams::Request {
-                        hook: shared::rpc::blocker_service::FilterHook::CefUrlRequestCreate,
+                        hook: FilterHook::CefUrlRequestCreate,
                         blocked: block,
                         url,
                     });

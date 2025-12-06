@@ -1,9 +1,4 @@
-#![feature(
-    once_cell_try,
-    maybe_uninit_uninit_array,
-    maybe_uninit_slice,
-    iter_intersperse
-)]
+#![feature(once_cell_try, maybe_uninit_slice, iter_intersperse)]
 #![warn(unsafe_op_in_unsafe_fn)]
 #![allow(clippy::module_inception, non_snake_case)]
 #![windows_subsystem = "windows"]

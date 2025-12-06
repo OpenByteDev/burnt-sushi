@@ -1,6 +1,6 @@
 use std::{
     fmt::Debug,
-    sync::{Mutex, MutexGuard}
+    sync::{Mutex, MutexGuard},
 };
 
 use chrono::Local;

@@ -1,3 +1,7 @@
+use dll_syringe::process::{OwnedProcess, Process};
+use fallible_iterator::FallibleIterator;
+use log::info;
+use project_uninit::partial_init;
 use std::{
     io,
     mem::{self, MaybeUninit},
@@ -5,11 +9,6 @@ use std::{
     os::windows::prelude::{AsRawHandle, HandleOrInvalid, OwnedHandle},
     ptr,
 };
-
-use dll_syringe::process::{OwnedProcess, Process};
-
-use fallible_iterator::FallibleIterator;
-use project_uninit::partial_init;
 use winapi::{
     shared::{
         minwindef::{BOOL, FALSE},
@@ -270,15 +269,18 @@ fn is_main_spotify_window(window: WindowHandle) -> bool {
         return false;
     }
 
-    let class_name = get_window_class_name(window);
-    match class_name {
-        Ok(name) => name.starts_with("Chrome_WidgetWin"),
-        Err(_) => false,
-    }
+    let class_name = match get_window_class_name(window) {
+        Ok(class_name) => class_name,
+        _ => return false,
+    };
+    info!("Found window '{title}' of class '{class_name}'.");
+    class_name.starts_with("Chrome_WidgetWin")
+        || class_name == "Chrome_RenderWidgetHostHWND"
+        || class_name == "GDI+ Hook Window Class"
 }
 
 fn get_window_class_name(window: WindowHandle) -> io::Result<String> {
-    let mut class_name_buf = MaybeUninit::uninit_array::<256>();
+    let mut class_name_buf = [const { MaybeUninit::uninit() }; 256];
     let result = unsafe {
         GetClassNameW(
             window.as_ptr(),
@@ -290,8 +292,7 @@ fn get_window_class_name(window: WindowHandle) -> io::Result<String> {
         0 => Err(io::Error::last_os_error()),
         name_len => {
             let name_len = name_len as usize;
-            let class_name =
-                unsafe { MaybeUninit::slice_assume_init_ref(&class_name_buf[..name_len]) };
+            let class_name = unsafe { class_name_buf[..name_len].assume_init_ref() };
             Ok(String::from_utf16_lossy(class_name))
         }
     }

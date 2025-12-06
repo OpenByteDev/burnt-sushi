@@ -2,17 +2,16 @@
 name = "burnt-sushi-blocker"
 version = "0.3.2"
 description = "Spotify AdBlocker for Windows"
-readme = "../README.md"
 repository = "https://github.com/OpenByteDev/burnt-sushi"
 license = "MIT"
 authors = ["OpenByte <development.openbyte@gmail.com>"]
-edition = "2021"
+edition = "2024"
 keywords = ["spotify", "adblocker", "windows", "blocker", "payload"]
 
 [dependencies]
-dll-syringe = { version = "0.15.2", features = ["payload-utils"], default-features = true }
-capnp = { version = "0.19.6", features = ["alloc"], default-features = false }
-capnp-rpc = { version = "0.19.2", default-features = false }
+dll-syringe = { version = "0.17.0", features = ["payload-utils"], default-features = true }
+capnp = { version = "0.23.0", features = ["alloc"], default-features = false }
+capnp-rpc = { version = "0.23.0", default-features = false }
 futures = { version = "0.3.30", default-features = false }
 tokio = { version = "1.38.1", features = ["net", "rt", "macros", "sync"], default-features = false }
 tokio-util = { version = "0.7.11", features = ["compat"], default-features = false }
@@ -22,11 +21,13 @@ shared = { path = "../shared", default-features = false }
 regex = { version = "1.10.5", default-features = false }
 enum-map = { version = "2.7.3", default-features = false }
 u16cstr = { version = "0.4.0", default-features = false }
+arc-swap = { version = "1.7.1", default-features = false }
 
 [lib]
 crate-type = ["cdylib"]
 
 [profile.release]
-strip = true  # Automatically strip symbols from the binary.
+strip = true
 lto = true
 opt-level = 3
+codegen-units = 1
