@@ -1,4 +1,4 @@
-use std::{ffi::CStr, mem, panic::AssertUnwindSafe, ptr, slice, sync::OnceLock};
+use std::{ffi::CStr, panic::AssertUnwindSafe, ptr, slice, sync::OnceLock};
 
 use cef::*;
 use dll_syringe::process::OwnedProcessModule;
@@ -69,15 +69,14 @@ fn init_get_addr_info_hook(
 ) -> Result<(), Box<dyn std::error::Error>> {
     let ws2 =
         OwnedProcessModule::find_local_by_name("WS2_32.dll")?.ok_or("WS2_32.dll not found")?;
-    let getaddrinfo = ws2.get_local_procedure_address("getaddrinfo")?;
-    let getaddrinfo = unsafe { mem::transmute::<_, GetAddrInfoFn>(getaddrinfo) };
+    let getaddrinfo = unsafe { ws2.get_local_procedure::<GetAddrInfoFn>("getaddrinfo")? };
     unsafe {
         GetAddrInfoHook.initialize(
             getaddrinfo,
             move |node_name, service_name, hints, result| {
                 let res = std::panic::catch_unwind(AssertUnwindSafe(|| {
                     let url = CStr::from_ptr(node_name).to_str().unwrap(); // TODO:
-                    let block = !filters.check(FilterHook::CefUrlRequestCreate, &url);
+                    let block = !filters.check(FilterHook::CefUrlRequestCreate, url);
 
                     let _ = log_tx.send(LogParams::Request {
                         hook: shared::rpc::blocker_service::FilterHook::GetAddrInfo,
@@ -114,13 +113,11 @@ fn init_cef_urlrequest_create_hook(
 ) -> Result<(), Box<dyn std::error::Error>> {
     let libcef =
         OwnedProcessModule::find_local_by_name("libcef.dll")?.ok_or("libcef.dll not found")?;
-    let cef_urlrequest_create = libcef.get_local_procedure_address("cef_urlrequest_create")?;
     let cef_urlrequest_create =
-        unsafe { mem::transmute::<_, CefUrlRequestCreateFn>(cef_urlrequest_create) };
-    let cef_string_userfree_utf16_free =
-        libcef.get_local_procedure_address("cef_string_userfree_utf16_free")?;
+        unsafe { libcef.get_local_procedure::<CefUrlRequestCreateFn>("cef_urlrequest_create")? };
     let cef_string_userfree_utf16_free = unsafe {
-        mem::transmute::<_, CefStringUserfreeUtf16FreeFn>(cef_string_userfree_utf16_free)
+        libcef
+            .get_local_procedure::<CefStringUserfreeUtf16FreeFn>("cef_string_userfree_utf16_free")?
     };
 
     unsafe {
