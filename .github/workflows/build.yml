@@ -13,21 +13,17 @@ jobs:
   build:
     runs-on: windows-latest
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v6
     
     - name: Install latest nightly for i686-pc-windows-msvc
-      uses: actions-rs/toolchain@v1
+      uses: dtolnay/rust-toolchain@nightly
       with:
-          target: i686-pc-windows-msvc
-          toolchain: nightly
-          override: true
+        targets: i686-pc-windows-msvc
     
     - name: Install latest nightly for x86_64-pc-windows-msvc
-      uses: actions-rs/toolchain@v1
+      uses: dtolnay/rust-toolchain@nightly
       with:
-          target: x86_64-pc-windows-msvc
-          toolchain: nightly
-          override: true
+        targets: x86_64-pc-windows-msvc
     
     - name: Install Cap'n Proto
       run: choco install capnproto
@@ -36,4 +32,4 @@ jobs:
       run: cargo build --manifest-path=burnt-sushi-blocker/Cargo.toml --target i686-pc-windows-msvc
           
     - name: Build burnt-sushi
-      run: cargo build --manifest-path=shared/Cargo.toml --target x86_64-pc-windows-msvc
+      run: cargo build --manifest-path=burnt-sushi/Cargo.toml --target x86_64-pc-windows-msvc
