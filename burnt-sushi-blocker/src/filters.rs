@@ -12,6 +12,7 @@ pub struct Filters {
 }
 
 impl Filters {
+    #[must_use]
     pub fn empty() -> Self {
         Self {
             rulesets: Arc::new(EnumMap::default()),
@@ -22,6 +23,7 @@ impl Filters {
         self.rulesets[hook].store(Arc::new(ruleset));
     }
 
+    #[must_use]
     pub fn check(&self, hook: FilterHook, request: &str) -> bool {
         let ruleset = self.rulesets[hook].load();
         ruleset.check(request)

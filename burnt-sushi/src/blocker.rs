@@ -2,20 +2,20 @@ use std::{mem, net::SocketAddrV4};
 
 use anyhow::Context;
 use dll_syringe::{
+    Syringe,
     error::SyringeError,
     process::{OwnedProcessModule, Process},
-    Syringe,
 };
 use log::{debug, error, info, warn};
 use serde::Deserialize;
 use tokio::{runtime, task::LocalSet};
 
 use crate::{
+    DEFAULT_BLOCKER_FILE_NAME,
     args::ARGS,
     resolver::{resolve_blocker, resolve_filter_config},
     rpc,
     spotify_process_scanner::{SpotifyInfo, SpotifyProcessScanner, SpotifyState},
-    DEFAULT_BLOCKER_FILE_NAME,
 };
 
 pub struct SpotifyAdBlocker {
@@ -109,7 +109,7 @@ impl SpotifyHookState {
                     debug!("Stopped RPC of previous blocker");
                 }
                 Err(e) => {
-                    error!("Failed to stop RPC of previous blocker: {}", e);
+                    error!("Failed to stop RPC of previous blocker: {e}");
                 }
             }
 
@@ -117,7 +117,7 @@ impl SpotifyHookState {
             match syringe.eject(prev_payload) {
                 Ok(_) => info!("Ejected previous blocker"),
                 Err(_) => error!("Failed to eject previous blocker"),
-            };
+            }
         }
 
         info!("Loading filter config...");
@@ -168,7 +168,7 @@ impl SpotifyHookState {
         let state = mem::replace(self, SpotifyHookState::Unhooked);
         let state = match state {
             SpotifyHookState::Hooked(state) => state,
-            _ => return,
+            SpotifyHookState::Unhooked => return,
         };
 
         info!("Unhooking Spotify...");
@@ -198,10 +198,9 @@ impl SpotifyHookState {
 
         match result {
             Ok(_)
-            | Err(SyringeError::ProcessInaccessible)
-            | Err(SyringeError::ModuleInaccessible) => {}
+            | Err(SyringeError::ProcessInaccessible | SyringeError::ModuleInaccessible) => {}
             _ => todo!("{:#?}", result),
-        };
+        }
 
         *self = SpotifyHookState::Unhooked;
     }

@@ -1,6 +1,6 @@
 use std::{ffi::CStr, panic::AssertUnwindSafe, ptr, slice, sync::OnceLock};
 
-use cef::*;
+use cef::{_cef_request_context_t, _cef_request_t, _cef_urlrequest_client_t, cef_urlrequest_t};
 use dll_syringe::process::OwnedProcessModule;
 use retour::static_detour;
 use shared::rpc::blocker_service::FilterHook;

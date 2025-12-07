@@ -10,10 +10,10 @@
 // panics.
 
 use winapi::um::consoleapi::AllocConsole;
-use winapi::um::wincon::{AttachConsole, FreeConsole, GetConsoleWindow, ATTACH_PARENT_PROCESS};
-use winapi::um::winuser::ShowWindow;
+use winapi::um::wincon::{ATTACH_PARENT_PROCESS, AttachConsole, FreeConsole, GetConsoleWindow};
 use winapi::um::winuser::SW_HIDE;
 use winapi::um::winuser::SW_SHOW;
+use winapi::um::winuser::ShowWindow;
 
 /// Check if we're attached to an existing Windows console
 pub fn is_attached() -> bool {

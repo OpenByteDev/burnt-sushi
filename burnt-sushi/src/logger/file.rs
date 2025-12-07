@@ -81,7 +81,7 @@ impl SimpleLog for FileLog {
             .open_file()
             .context("Failed to prepare log file.")
             .unwrap();
-        writeln!(file, "{}", message).unwrap();
+        writeln!(file, "{message}").unwrap();
         file.flush().unwrap();
     }
 }

@@ -1,7 +1,7 @@
 use std::rc::Rc;
 
 use capnp::capability::Promise;
-use capnp_rpc::{pry, rpc_twoparty_capnp, twoparty, RpcSystem};
+use capnp_rpc::{RpcSystem, pry, rpc_twoparty_capnp, twoparty};
 use futures::{AsyncReadExt, FutureExt};
 use log::{debug, info};
 use tokio::net::ToSocketAddrs;
@@ -60,7 +60,7 @@ pub async fn run(
                 reader,
                 writer,
                 rpc_twoparty_capnp::Side::Client,
-                Default::default(),
+                capnp::message::ReaderOptions::default(),
             ));
             let mut rpc_system = RpcSystem::new(rpc_network, None);
             let client: shared::rpc::blocker_service::Client =

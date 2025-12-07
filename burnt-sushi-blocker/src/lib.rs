@@ -1,4 +1,5 @@
 #![feature(once_cell_try)]
+#![warn(clippy::pedantic)]
 
 use std::{
     cell::{OnceCell, RefCell},
@@ -16,6 +17,7 @@ use hooks::LogParams;
 use regex::RegexSet;
 use tokio::select;
 
+#[allow(clippy::pedantic)]
 mod cef;
 mod filters;
 mod hooks;
@@ -46,7 +48,7 @@ fn start_rpc() -> SocketAddrV4 {
             .build()
             .unwrap()
             .block_on(tokio::task::LocalSet::new().run_until(run_rpc(end_point_tx, disconnect_rx)))
-            .unwrap()
+            .unwrap();
     });
 
     let socket_addr = end_point_rx.blocking_recv().unwrap();
@@ -98,7 +100,7 @@ async fn run_rpc(
                     reader,
                     writer,
                     rpc_twoparty_capnp::Side::Server,
-                    Default::default(),
+                    capnp::message::ReaderOptions::default(),
                 );
 
                 let rpc_system = RpcSystem::new(Box::new(network), Some(client.clone().client));

@@ -13,6 +13,7 @@ pub static ARGS: LazyLock<Args> = LazyLock::new(|| {
 
 #[derive(Parser, Debug)]
 #[command(author, version, about, long_about = None)]
+#[allow(clippy::struct_excessive_bools)]
 pub struct Args {
     /// Show a console window with debug output.
     #[arg(long)]

@@ -1,9 +1,20 @@
 #![feature(once_cell_try, maybe_uninit_slice, iter_intersperse, lazy_get)]
-#![warn(unsafe_op_in_unsafe_fn)]
-#![allow(clippy::module_inception, non_snake_case)]
+#![warn(unsafe_op_in_unsafe_fn, clippy::pedantic)]
+#![allow(
+    non_snake_case,
+    clippy::module_inception,
+    clippy::ignored_unit_patterns,
+    clippy::cast_possible_truncation,
+    clippy::collapsible_if,
+    clippy::redundant_else,
+    clippy::needless_pass_by_value,
+    clippy::cast_possible_wrap,
+    clippy::cast_sign_loss,
+    clippy::redundant_closure_for_method_calls
+)]
 #![windows_subsystem = "windows"]
 
-use anyhow::{anyhow, Context};
+use anyhow::{Context, anyhow};
 use dll_syringe::process::{OwnedProcess, Process};
 use log::{debug, error, info, trace, warn};
 use winapi::{
@@ -11,10 +22,12 @@ use winapi::{
     um::{processthreadsapi::OpenProcess, synchapi::WaitForSingleObject, winnt::PROCESS_TERMINATE},
 };
 
-use std::{env, io, os::windows::prelude::FromRawHandle, sync::LazyLock, time::Duration};
+use std::{
+    env, io, num::NonZero, os::windows::prelude::FromRawHandle, sync::LazyLock, time::Duration,
+};
 
 use crate::{
-    args::{LogLevel, ARGS},
+    args::{ARGS, LogLevel},
     blocker::SpotifyAdBlocker,
     logger::{Console, FileLog},
     named_mutex::NamedMutex,
@@ -71,17 +84,14 @@ async fn main() {
         logger::global::get().file = Some(FileLog::new(log_file));
     }
 
-    info!("{}", APP_NAME_WITH_VERSION);
+    info!("{APP_NAME_WITH_VERSION}");
     trace!(
         "Running from {}",
         env::current_exe()
             .unwrap_or_else(|_| "<unknown>".into())
             .display()
     );
-    trace!(
-        "Running with {:#?}",
-        LazyLock::get(&ARGS).unwrap()
-    );
+    trace!("Running with {:#?}", LazyLock::get(&ARGS).unwrap());
 
     if ARGS.install {
         match handle_install().await {
@@ -122,13 +132,12 @@ async fn main() {
         match guard_result {
             Ok(Some(_guard)) => run().await,
             Ok(None) => {
-                error!("App is already running. (use --ignore-singleton to ignore)\nExiting...")
+                error!("App is already running. (use --ignore-singleton to ignore)\nExiting...");
             }
-            Err(e) => error!(
-                "Failed to lock singleton mutex: {} (use --ignore-singleton to ignore)  ",
-                e
-            ),
-        };
+            Err(e) => {
+                error!("Failed to lock singleton mutex: {e} (use --ignore-singleton to ignore)  ");
+            }
+        }
     }
 
     logger::global::unset();
@@ -175,7 +184,7 @@ async fn wait_for_ctrl_c() -> Result<(), ctrlc::Error> {
     let mut handler = Some(move || tx.send(()).unwrap());
     ctrlc::set_handler(move || {
         if let Some(h) = handler.take() {
-            h()
+            h();
         }
     })?;
     rx.await.unwrap();
@@ -209,7 +218,7 @@ fn terminate_other_instances() -> anyhow::Result<()> {
             OpenProcess(
                 PROCESS_TERMINATE,
                 FALSE,
-                process.pid().map_or(0, |v| v.get()),
+                process.pid().map_or(0, NonZero::get),
             )
         };
 

@@ -1,9 +1,11 @@
 #![feature(variant_count)]
+#![warn(clippy::pedantic)]
 
 use core::{fmt, hash};
 use std::mem;
 
 #[allow(dead_code)]
+#[allow(clippy::pedantic)]
 mod spotify_ad_guard_capnp {
     include!(concat!(env!("OUT_DIR"), "\\spotify_ad_guard_capnp.rs"));
 }
@@ -15,7 +17,7 @@ pub mod rpc {
 #[allow(clippy::derived_hash_with_manual_eq)]
 impl hash::Hash for rpc::blocker_service::FilterHook {
     fn hash<H: hash::Hasher>(&self, state: &mut H) {
-        core::mem::discriminant(self).hash(state)
+        core::mem::discriminant(self).hash(state);
     }
 }
 

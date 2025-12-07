@@ -6,8 +6,8 @@ use std::{
 use log::{debug, error, warn};
 
 use crate::{
-    blocker::FilterConfig, APP_AUTHOR, APP_NAME_WITH_VERSION, DEFAULT_BLOCKER_FILE_NAME,
-    DEFAULT_FILTER_FILE_NAME,
+    APP_AUTHOR, APP_NAME_WITH_VERSION, DEFAULT_BLOCKER_FILE_NAME, DEFAULT_FILTER_FILE_NAME,
+    blocker::FilterConfig,
 };
 
 pub async fn resolve_blocker(provided_path: Option<&Path>) -> io::Result<PathBuf> {
@@ -112,15 +112,14 @@ pub async fn resolve_filter_config(provided_path: Option<&Path>) -> io::Result<F
     }
 
     fn try_load_filter_config_from_str(filter_config: &str) -> io::Result<FilterConfig> {
-        match toml::from_str(filter_config) {
-            Ok(filter_config) => Ok(filter_config),
-            Err(_) => {
-                warn!("Failed to parse filter config.");
-                Err(io::Error::new(
-                    io::ErrorKind::InvalidData,
-                    "Filter config is invalid.",
-                ))
-            }
+        if let Ok(filter_config) = toml::from_str(filter_config) {
+            Ok(filter_config)
+        } else {
+            warn!("Failed to parse filter config.");
+            Err(io::Error::new(
+                io::ErrorKind::InvalidData,
+                "Filter config is invalid.",
+            ))
         }
     }
 

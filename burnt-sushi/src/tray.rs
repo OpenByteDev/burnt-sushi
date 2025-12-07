@@ -14,16 +14,16 @@ use winapi::um::{
 };
 
 use crate::{
-    logger::{self, Console},
     APP_NAME,
+    logger::{self, Console},
 };
 
 static INITIALIZED: AtomicBool = AtomicBool::new(false);
 
 pub struct SystemTrayManager {
     ui_thread: Option<thread::JoinHandle<()>>,
-    ui_thread_exit: tokio::sync::watch::Receiver<bool>,
-    ui_thread_id: u32,
+    exit_recv: tokio::sync::watch::Receiver<bool>,
+    thread_id: u32,
 }
 
 impl SystemTrayManager {
@@ -55,17 +55,17 @@ impl SystemTrayManager {
 
         Ok(Self {
             ui_thread: Some(ui_thread),
-            ui_thread_id: start_rx.await.unwrap()?,
-            ui_thread_exit: exit_rx,
+            thread_id: start_rx.await.unwrap()?,
+            exit_recv: exit_rx,
         })
     }
 
     pub async fn wait_for_exit(&mut self) {
-        if self.ui_thread.is_none() || *self.ui_thread_exit.borrow() {
+        if self.ui_thread.is_none() || *self.exit_recv.borrow() {
             return;
         }
 
-        self.ui_thread_exit.changed().await.unwrap();
+        self.exit_recv.changed().await.unwrap();
 
         if let Some(ui_thread) = self.ui_thread.take() {
             ui_thread.join().unwrap();
@@ -73,8 +73,8 @@ impl SystemTrayManager {
     }
 
     pub async fn exit(mut self) {
-        unsafe { PostThreadMessageW(self.ui_thread_id, WM_QUIT, 0, 0) };
-        self.wait_for_exit().await
+        unsafe { PostThreadMessageW(self.thread_id, WM_QUIT, 0, 0) };
+        self.wait_for_exit().await;
     }
 }
 
@@ -105,6 +105,7 @@ pub struct SystemTrayIcon {
     tray_item3: nwg::MenuItem,
 }
 
+#[allow(clippy::unused_self)]
 impl SystemTrayIcon {
     fn exit(&self) {
         nwg::stop_thread_dispatch();

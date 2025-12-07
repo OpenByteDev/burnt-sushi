@@ -67,7 +67,11 @@ pub async fn update() -> anyhow::Result<bool> {
     let asset = release
         .assets
         .into_iter()
-        .find(|asset| asset.name.ends_with(".exe"))
+        .find(|asset| {
+            Path::new(&asset.name)
+                .extension()
+                .is_some_and(|ext| ext.eq_ignore_ascii_case("exe"))
+        })
         .context("No release executable asset found")?;
 
     debug!(
@@ -107,7 +111,7 @@ pub async fn update() -> anyhow::Result<bool> {
         }
         Err(e) => {
             return Err(e)
-                .context("Failed to move updated executable to current executable path")?
+                .context("Failed to move updated executable to current executable path")?;
         }
     }
 
@@ -196,11 +200,11 @@ async fn confirm_update(version: &str) -> bool {
         Some(Box::new(move |res| {
             let confirmed = match res {
                 Ok(arg) => {
-                    debug!("Update toast activated (arg={})", arg);
+                    debug!("Update toast activated (arg={arg})");
                     arg == CONFIRM_ACTION
                 }
                 Err(err) => {
-                    debug!("Update toast activation failed (err={})", err);
+                    debug!("Update toast activation failed (err={err})");
                     false
                 }
             };
@@ -208,19 +212,19 @@ async fn confirm_update(version: &str) -> bool {
         })),
         Some(Box::new(move |res| {
             match res {
-                Ok(reason) => debug!("Update toast dismissed (reason={:?})", reason),
-                Err(err) => debug!("Update toast dismissal failed (err={})", err),
-            };
+                Ok(reason) => debug!("Update toast dismissed (reason={reason:?})"),
+                Err(err) => debug!("Update toast dismissal failed (err={err})"),
+            }
             confirm_tx3.try_send(false).unwrap();
         })),
         Some(Box::new(move |err| {
-            error!("Update toast failed: {}", err);
+            error!("Update toast failed: {err}");
             confirm_tx4.try_send(false).unwrap();
         })),
     );
 
     if let Err(err) = confirmed {
-        error!("Failed to show toast: {}", err);
+        error!("Failed to show toast: {err}");
         return false;
     }
 

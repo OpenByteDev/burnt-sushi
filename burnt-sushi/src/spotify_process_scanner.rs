@@ -18,7 +18,7 @@ use winapi::{
     um::{
         errhandlingapi::{GetLastError, SetLastError},
         tlhelp32::{
-            CreateToolhelp32Snapshot, Thread32First, Thread32Next, TH32CS_SNAPTHREAD, THREADENTRY32,
+            CreateToolhelp32Snapshot, TH32CS_SNAPTHREAD, THREADENTRY32, Thread32First, Thread32Next,
         },
         winuser::{
             EnumChildWindows, EnumThreadWindows, GetClassNameW, GetWindowTextLengthW,
@@ -26,7 +26,7 @@ use winapi::{
         },
     },
 };
-use wineventhook::{raw_event, AccessibleObjectId, EventFilter, WindowEventHook, WindowHandle};
+use wineventhook::{AccessibleObjectId, EventFilter, WindowEventHook, WindowHandle, raw_event};
 
 #[derive(Debug)]
 pub struct SpotifyProcessScanner {
@@ -260,18 +260,16 @@ fn is_spotify_process(process: impl Process) -> bool {
 }
 
 fn is_main_spotify_window(window: WindowHandle) -> bool {
-    let title = match get_window_title(window) {
-        Ok(Some(title)) => title,
-        _ => return false,
+    let Ok(Some(title)) = get_window_title(window) else {
+        return false;
     };
 
     if title.trim().is_empty() || title == "G" || title == "Default IME" {
         return false;
     }
 
-    let class_name = match get_window_class_name(window) {
-        Ok(class_name) => class_name,
-        _ => return false,
+    let Ok(class_name) = get_window_class_name(window) else {
+        return false;
     };
     info!("Found window '{title}' of class '{class_name}'.");
     class_name.starts_with("Chrome_WidgetWin")
@@ -364,7 +362,7 @@ impl FallibleIterator for Toolhelp32ThreadIterator {
         };
         if result == FALSE {
             let err = io::Error::last_os_error();
-            if err.raw_os_error() == Some(ERROR_NO_MORE_FILES as i32) {
+            if err.raw_os_error() == Some(ERROR_NO_MORE_FILES.cast_signed()) {
                 return Ok(None);
             } else {
                 return Err(err);
@@ -384,8 +382,13 @@ fn list_thread_windows(thread_id: u32, include_children: bool) -> Vec<WindowHand
     }
 
     let mut windows = Vec::<WindowHandle>::new();
-    let _result =
-        unsafe { EnumThreadWindows(thread_id, Some(enum_proc), &mut windows as *mut _ as isize) };
+    let _result = unsafe {
+        EnumThreadWindows(
+            thread_id,
+            Some(enum_proc),
+            (&raw mut windows).addr().cast_signed(),
+        )
+    };
 
     if include_children {
         let root_window_count = windows.len();
@@ -395,7 +398,7 @@ fn list_thread_windows(thread_id: u32, include_children: bool) -> Vec<WindowHand
                 EnumChildWindows(
                     window.as_ptr(),
                     Some(enum_proc),
-                    &mut windows as *mut _ as isize,
+                    (&raw mut windows).addr().cast_signed(),
                 )
             };
         }

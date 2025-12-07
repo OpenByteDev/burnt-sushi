@@ -23,7 +23,7 @@ use winapi::{
     },
 };
 
-use crate::{logger::SimpleLog, APP_NAME_WITH_VERSION};
+use crate::{APP_NAME_WITH_VERSION, logger::SimpleLog};
 
 use super::raw;
 
@@ -59,7 +59,7 @@ impl Console {
             CreatePipe(
                 child_stdin_read_pipe.as_mut_ptr(),
                 child_stdin_write_pipe.as_mut_ptr(),
-                &mut security_attributes,
+                &raw mut security_attributes,
                 0,
             )
         } == FALSE
@@ -151,7 +151,7 @@ impl Console {
 
 impl SimpleLog for Console {
     fn log(&mut self, message: &str) {
-        self.println(message).unwrap()
+        self.println(message).unwrap();
     }
 }
 

@@ -61,14 +61,14 @@ impl NamedMutex {
 #[derive(Debug)]
 pub struct NamedMutexGuard<'lock>(HANDLE, PhantomData<&'lock NamedMutex>);
 
-impl<'lock> NamedMutexGuard<'lock> {
+impl NamedMutexGuard<'_> {
     pub fn unlock(mut self) -> io::Result<()> {
-        unsafe { self._unlock() }?;
+        unsafe { self.unlock_core() }?;
         self.0 = ptr::null_mut();
         Ok(())
     }
 
-    unsafe fn _unlock(&mut self) -> io::Result<()> {
+    unsafe fn unlock_core(&mut self) -> io::Result<()> {
         let result = unsafe { ReleaseMutex(self.0) };
 
         if result == 0 {
@@ -82,7 +82,7 @@ impl<'lock> NamedMutexGuard<'lock> {
 impl Drop for NamedMutexGuard<'_> {
     fn drop(&mut self) {
         if !self.0.is_null() {
-            let result = unsafe { self._unlock() };
+            let result = unsafe { self.unlock_core() };
             debug_assert!(
                 result.is_ok(),
                 "Failed to unlock mutex: {:?}",
