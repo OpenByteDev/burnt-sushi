@@ -12,24 +12,25 @@ env:
 jobs:
   build:
     runs-on: windows-latest
+    strategy:
+      matrix:
+        target: [i686-pc-windows-msvc, x86_64-pc-windows-msvc]
     steps:
     - uses: actions/checkout@v6
     
-    - name: Install latest nightly for i686-pc-windows-msvc
+    - name: Install nightly for ${{ matrix.target }}
       uses: dtolnay/rust-toolchain@nightly
       with:
-        targets: i686-pc-windows-msvc
-    
-    - name: Install latest nightly for x86_64-pc-windows-msvc
-      uses: dtolnay/rust-toolchain@nightly
-      with:
-        targets: x86_64-pc-windows-msvc
+        targets: ${{ matrix.target }}
     
     - name: Install Cap'n Proto
       run: choco install capnproto
       
+    - name: Build shared
+      run: cargo build --manifest-path=shared/Cargo.toml --target ${{ matrix.target }}
+      
     - name: Build burnt-sushi-blocker
-      run: cargo build --manifest-path=burnt-sushi-blocker/Cargo.toml --target i686-pc-windows-msvc
+      run: cargo build --manifest-path=burnt-sushi-blocker/Cargo.toml --target ${{ matrix.target }}
           
     - name: Build burnt-sushi
-      run: cargo build --manifest-path=burnt-sushi/Cargo.toml --target x86_64-pc-windows-msvc
+      run: cargo build --manifest-path=burnt-sushi/Cargo.toml --target ${{ matrix.target }}
