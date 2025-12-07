@@ -11,8 +11,7 @@ use log::{debug, error, info};
 use reqwest::header::HeaderValue;
 use self_update::update::Release;
 use tokio::fs::{self, File};
-use u16cstr::u16cstr;
-use widestring::U16CString;
+use widestring::{U16CString, u16cstr};
 use winapi::um::{shellapi::ShellExecuteW, winuser::SW_SHOWDEFAULT};
 use winrt_toast::{Action, Text, Toast, ToastManager};
 

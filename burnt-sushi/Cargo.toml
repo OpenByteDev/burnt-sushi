@@ -38,7 +38,6 @@ faccess = { version = "0.2.4", default-features = false }
 semver = { version = "1.0.23", default-features = false }
 lenient_semver = { version = "0.4.2", default-features = false, features = ["semver"] }
 tempfile = { version = "3.10.1", default-features = false }
-u16cstr = { version = "0.4.0", default-features = false }
 reqwest = { version = "0.12.5", default-features = false }
 anyhow = { version = "1.0.86", default-features = false, features = ["std", "backtrace"] }
 dirs = { version = "6.0.0", default-features = false }
