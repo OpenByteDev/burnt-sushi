@@ -1,4 +1,4 @@
-#![feature(once_cell_try, maybe_uninit_slice, iter_intersperse)]
+#![feature(once_cell_try, maybe_uninit_slice, iter_intersperse, lazy_get)]
 #![warn(unsafe_op_in_unsafe_fn)]
 #![allow(clippy::module_inception, non_snake_case)]
 #![windows_subsystem = "windows"]
@@ -11,7 +11,7 @@ use winapi::{
     um::{processthreadsapi::OpenProcess, synchapi::WaitForSingleObject, winnt::PROCESS_TERMINATE},
 };
 
-use std::{env, io, os::windows::prelude::FromRawHandle, time::Duration};
+use std::{env, io, os::windows::prelude::FromRawHandle, sync::LazyLock, time::Duration};
 
 use crate::{
     args::{LogLevel, ARGS},
@@ -77,6 +77,10 @@ async fn main() {
         env::current_exe()
             .unwrap_or_else(|_| "<unknown>".into())
             .display()
+    );
+    trace!(
+        "Running with {:#?}",
+        LazyLock::get(&ARGS).unwrap()
     );
 
     if ARGS.install {
