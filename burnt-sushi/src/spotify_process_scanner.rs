@@ -225,6 +225,7 @@ fn get_window_title(window: WindowHandle) -> io::Result<Option<String>> {
     let result =
         unsafe { GetWindowTextW(window.as_ptr(), text.as_mut_ptr(), text.capacity() as i32) };
     if result != 0 {
+        let text_len = result as usize;
         unsafe { text.set_len(text_len) };
         let text = String::from_utf16_lossy(&text);
         Ok(Some(text))
