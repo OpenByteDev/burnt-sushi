@@ -95,7 +95,7 @@ impl Console {
             cbReserved2: 0,
             dwFlags: STARTF_USESTDHANDLES,
             lpReserved2: ptr::null_mut(),
-            hStdInput: child_stdin_read_pipe.into_raw_handle(),
+            hStdInput: child_stdin_read_pipe.as_raw_handle(),
             hStdOutput: ptr::null_mut(),
             hStdError: ptr::null_mut(),
         });
