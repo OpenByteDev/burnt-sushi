@@ -1,0 +1,28 @@
+name: Sync filters
+
+on:
+  schedule:
+    - cron: '0 6 * * 1'
+  workflow_dispatch:
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+    steps:
+    - uses: actions/checkout@v6
+
+    - name: Fetch latest filter list
+      shell: pwsh
+      run: ./sync-filters.ps1
+
+    - name: Create pull request
+      uses: peter-evans/create-pull-request@v7
+      with:
+        commit-message: 'Sync filter.toml with spotify-adblock'
+        title: 'Sync filter.toml with spotify-adblock'
+        body: Automated update of `filter.toml` from [abba23/spotify-adblock](https://github.com/abba23/spotify-adblock/blob/main/config.toml).
+        branch: sync-filters
+        delete-branch: true
