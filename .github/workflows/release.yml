@@ -1,0 +1,87 @@
+name: Release
+
+on:
+  push:
+    tags: [ 'v*' ]
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Tag to release (e.g. v0.3.3)'
+        required: true
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  build:
+    runs-on: windows-latest
+    strategy:
+      matrix:
+        include:
+          - target: x86_64-pc-windows-msvc
+            arch: x86_64
+          - target: i686-pc-windows-msvc
+            arch: i686
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: ${{ inputs.tag || github.ref }}
+
+      - name: Install nightly for ${{ matrix.target }}
+        uses: dtolnay/rust-toolchain@nightly
+        with:
+          targets: ${{ matrix.target }}
+
+      - name: Install Cap'n Proto
+        run: choco install capnproto
+
+      - name: Install WiX Toolset
+        run: choco install wixtoolset --version=3.14.1
+
+      - name: Install cargo-wix
+        uses: taiki-e/cache-cargo-install-action@v2
+        with:
+          tool: cargo-wix
+
+      - name: Build shared
+        run: cargo build --release --manifest-path=shared/Cargo.toml --target ${{ matrix.target }}
+
+      - name: Build blocker
+        run: cargo build --release --manifest-path=burnt-sushi-blocker/Cargo.toml --target ${{ matrix.target }}
+
+      - name: Build cli
+        run: cargo build --release --manifest-path=burnt-sushi/Cargo.toml --target ${{ matrix.target }}
+
+      - name: Rename portable exe
+        run: Copy-Item "burnt-sushi/target/${{ matrix.target }}/release/BurntSushi.exe" "BurntSushi-${{ matrix.arch }}.exe"
+
+      - name: Build MSI installer
+        working-directory: burnt-sushi
+        run: cargo wix --target ${{ matrix.target }} --nocapture --output ../BurntSushi-${{ matrix.arch }}.msi
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: burnt-sushi-${{ matrix.arch }}
+          path: |
+            BurntSushi-${{ matrix.arch }}.exe
+            BurntSushi-${{ matrix.arch }}.msi
+
+  release:
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Download artifacts
+        uses: actions/download-artifact@v5
+        with:
+          path: artifacts
+          merge-multiple: true
+
+      - name: Create draft release
+        uses: softprops/action-gh-release@v3
+        with:
+          tag_name: ${{ inputs.tag || github.ref_name }}
+          draft: true
+          files: artifacts/*
