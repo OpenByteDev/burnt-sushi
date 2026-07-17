@@ -199,7 +199,7 @@ impl SpotifyHookState {
         match result {
             Ok(_)
             | Err(SyringeError::ProcessInaccessible | SyringeError::ModuleInaccessible) => {}
-            _ => todo!("{:#?}", result),
+            Err(e) => error!("Failed to fully unhook Spotify: {e:#?}"),
         }
 
         *self = SpotifyHookState::Unhooked;
