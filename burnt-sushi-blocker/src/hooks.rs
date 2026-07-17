@@ -1,6 +1,11 @@
-use std::{ffi::CStr, panic::AssertUnwindSafe, ptr, slice, sync::OnceLock};
+use std::{
+    ffi::{CStr, c_void},
+    panic::AssertUnwindSafe,
+    ptr, slice,
+    sync::OnceLock,
+};
 
-use cef::{_cef_request_context_t, _cef_request_t, _cef_urlrequest_client_t, cef_urlrequest_t};
+use cef::{_cef_request_t, _cef_string_utf16_t};
 use dll_syringe::process::OwnedProcessModule;
 use retour::static_detour;
 use shared::rpc::blocker_service::FilterHook;
@@ -16,14 +21,11 @@ type GetAddrInfoFn =
 static_detour! {
     static GetAddrInfoHook: unsafe extern "system" fn(PCSTR, PCSTR, *const ADDRINFOA, *const *const ADDRINFOA) -> INT;
 }
-type CefUrlRequestCreateFn = unsafe extern "C" fn(
-    *mut cef::_cef_request_t,
-    *mut cef::_cef_urlrequest_client_t,
-    *mut cef::_cef_request_context_t,
-) -> *mut cef::cef_urlrequest_t;
-type CefStringUserfreeUtf16FreeFn = unsafe extern "C" fn(cef::cef_string_userfree_utf16_t);
+type CefUrlRequestCreateFn =
+    unsafe extern "C" fn(*mut _cef_request_t, *mut c_void, *mut c_void) -> *mut c_void;
+type CefStringUserfreeUtf16FreeFn = unsafe extern "C" fn(*mut _cef_string_utf16_t);
 static_detour! {
-    static CefUrlRequestCreateHook: unsafe extern "C" fn(*mut _cef_request_t, *mut _cef_urlrequest_client_t, *mut _cef_request_context_t) -> *mut cef_urlrequest_t;
+    static CefUrlRequestCreateHook: unsafe extern "C" fn(*mut _cef_request_t, *mut c_void, *mut c_void) -> *mut c_void;
 }
 
 pub enum LogParams {
@@ -123,7 +125,7 @@ fn init_cef_urlrequest_create_hook(
     unsafe {
         CefUrlRequestCreateHook.initialize(
             cef_urlrequest_create,
-            move |request, client, request_context| -> *mut cef::cef_urlrequest_t {
+            move |request, client, request_context| -> *mut c_void {
                 let res = std::panic::catch_unwind(AssertUnwindSafe(|| {
                     if request.is_null() {
                         return false;
