@@ -76,7 +76,7 @@ fn init_get_addr_info_hook(
             move |node_name, service_name, hints, result| {
                 let res = std::panic::catch_unwind(AssertUnwindSafe(|| {
                     let url = CStr::from_ptr(node_name).to_str().unwrap(); // TODO:
-                    let block = !filters.check(FilterHook::CefUrlRequestCreate, url);
+                    let block = !filters.check(FilterHook::GetAddrInfo, url);
 
                     let _ = log_tx.send(LogParams::Request {
                         hook: shared::rpc::blocker_service::FilterHook::GetAddrInfo,
