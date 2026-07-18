@@ -7,15 +7,14 @@ use std::{
 };
 
 use anyhow::Context;
-use log::{debug, error, info};
+use log::{debug, info};
 use reqwest::header::HeaderValue;
 use self_update::update::Release;
 use tokio::fs::{self, File};
 use widestring::{U16CString, u16cstr};
 use winapi::um::{shellapi::ShellExecuteW, winuser::SW_SHOWDEFAULT};
-use winrt_toast::{Action, Text, Toast, ToastManager};
 
-use crate::{APP_NAME, APP_VERSION, ARGS};
+use crate::{APP_NAME, APP_VERSION, ARGS, toast};
 
 pub async fn update() -> anyhow::Result<bool> {
     let releases = tokio::task::spawn_blocking(load_releases)
@@ -175,59 +174,13 @@ fn load_releases() -> Result<Vec<Release>, self_update::errors::Error> {
 }
 
 async fn confirm_update(version: &str) -> bool {
-    const POWERSHELL_APP_ID: &str =
-        "{1AC14E77-02E7-4E5D-B744-2EB1AE5198B7}\\WindowsPowerShell\\v1.0\\powershell.exe";
-    const CONFIRM_ACTION: &str = "Update";
-    const IGNORE_ACTION: &str = "Ignore";
-
-    let (confirm_tx, mut confirm_rx) = tokio::sync::mpsc::channel::<bool>(1);
-
-    let manager = ToastManager::new(POWERSHELL_APP_ID);
-    let mut toast = Toast::new();
-    toast
-        .text1("BurntSushi")
-        .text2(Text::new(format!("Update app to to {version}?")))
-        .action(Action::new("Update", CONFIRM_ACTION, CONFIRM_ACTION))
-        .action(Action::new("Ignore", IGNORE_ACTION, IGNORE_ACTION));
-
-    let confirm_tx2 = confirm_tx.clone();
-    let confirm_tx3 = confirm_tx.clone();
-    let confirm_tx4 = confirm_tx.clone();
-
-    let confirmed = manager.show_with_callbacks(
-        &toast,
-        Some(Box::new(move |res| {
-            let confirmed = match res {
-                Ok(arg) => {
-                    debug!("Update toast activated (arg={arg})");
-                    arg == CONFIRM_ACTION
-                }
-                Err(err) => {
-                    debug!("Update toast activation failed (err={err})");
-                    false
-                }
-            };
-            confirm_tx2.try_send(confirmed).unwrap();
-        })),
-        Some(Box::new(move |res| {
-            match res {
-                Ok(reason) => debug!("Update toast dismissed (reason={reason:?})"),
-                Err(err) => debug!("Update toast dismissal failed (err={err})"),
-            }
-            confirm_tx3.try_send(false).unwrap();
-        })),
-        Some(Box::new(move |err| {
-            error!("Update toast failed: {err}");
-            confirm_tx4.try_send(false).unwrap();
-        })),
-    );
-
-    if let Err(err) = confirmed {
-        error!("Failed to show toast: {err}");
-        return false;
-    }
-
-    confirm_rx.recv().await.unwrap()
+    toast::show(
+        "BurntSushi",
+        &format!("Update app to {version}?"),
+        &[("Update", true), ("Ignore", false)],
+    )
+    .await
+    .unwrap_or(false)
 }
 
 fn download_file(url: &str, target: impl Write) -> Result<(), self_update::errors::Error> {

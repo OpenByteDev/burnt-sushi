@@ -40,6 +40,7 @@ mod named_mutex;
 mod resolver;
 mod rpc;
 mod spotify_process_scanner;
+mod toast;
 mod tray;
 mod update;
 
