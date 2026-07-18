@@ -19,7 +19,7 @@ jobs:
       run: ./sync-filters.ps1
 
     - name: Create pull request
-      uses: peter-evans/create-pull-request@v7
+      uses: peter-evans/create-pull-request@v8
       with:
         commit-message: 'Sync filter.toml with spotify-adblock'
         title: 'Sync filter.toml with spotify-adblock'
