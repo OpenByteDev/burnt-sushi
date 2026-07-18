@@ -22,6 +22,9 @@ regex = { version = "1.10.5", default-features = false }
 enum-map = { version = "2.7.3", default-features = false }
 arc-swap = { version = "1.7.1", default-features = false }
 
+[build-dependencies]
+winres = "0.1.12"
+
 [lib]
 crate-type = ["cdylib"]
 

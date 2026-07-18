@@ -201,7 +201,7 @@ async fn handle_install() -> anyhow::Result<()> {
         .parent()
         .ok_or_else(|| anyhow!("Failed to determine parent directory"))?
         .join(DEFAULT_BLOCKER_FILE_NAME);
-    resolver::resolve_blocker(Some(&blocker_location))
+    resolver::install_blocker(&blocker_location)
         .await
         .context("Failed to write blocker to disk")?;
 

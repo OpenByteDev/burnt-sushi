@@ -6,45 +6,61 @@ use std::{
 use log::{debug, error, warn};
 
 use crate::{
-    APP_AUTHOR, APP_NAME_WITH_VERSION, DEFAULT_BLOCKER_FILE_NAME, DEFAULT_FILTER_FILE_NAME,
-    blocker::FilterConfig,
+    APP_AUTHOR, APP_NAME_WITH_VERSION, APP_VERSION, DEFAULT_BLOCKER_FILE_NAME,
+    DEFAULT_FILTER_FILE_NAME, blocker::FilterConfig,
 };
 
-pub async fn resolve_blocker(provided_path: Option<&Path>) -> io::Result<PathBuf> {
-    async fn try_load_blocker(
-        path: &Path,
-        check_len: bool,
-        write_if_absent: bool,
-    ) -> io::Result<()> {
-        let payload_bytes = include_bytes!(concat!(env!("OUT_DIR"), "\\BurntSushiBlocker_x64.dll"));
+fn blocker_matches_current_version(path: &Path) -> bool {
+    let Some(path) = path.to_str() else {
+        return false;
+    };
+    let Some((major, minor, patch, _build)) = version_info::get_file_version(path) else {
+        return false;
+    };
+    let Ok(expected) = semver::Version::parse(APP_VERSION) else {
+        return false;
+    };
+    u64::from(major) == expected.major
+        && u64::from(minor) == expected.minor
+        && u64::from(patch) == expected.patch
+}
 
-        debug!("Looking for blocker at '{}'", path.display());
-        if let Ok(metadata) = tokio::fs::metadata(path).await {
-            if metadata.is_file() {
-                debug!("Found blocker at '{}'", path.display());
-                if check_len && metadata.len() != payload_bytes.len() as u64 {
-                    debug!(
-                        "Blocker at '{}' was ignored due to incorrect size.",
-                        path.display()
-                    );
-                } else {
-                    return Ok(());
-                }
+async fn try_load_blocker(path: &Path, check_version: bool, write_if_absent: bool) -> io::Result<()> {
+    let payload_bytes = include_bytes!(concat!(env!("OUT_DIR"), "\\BurntSushiBlocker_x64.dll"));
+
+    debug!("Looking for blocker at '{}'", path.display());
+    if let Ok(metadata) = tokio::fs::metadata(path).await {
+        if metadata.is_file() {
+            debug!("Found blocker at '{}'", path.display());
+            if check_version && !blocker_matches_current_version(path) {
+                debug!(
+                    "Blocker at '{}' was ignored due to outdated version.",
+                    path.display()
+                );
+            } else {
+                return Ok(());
             }
         }
-        if write_if_absent {
-            debug!("Writing blocker to '{}'", path.display());
-            tokio::fs::create_dir_all(path.parent().unwrap()).await?;
-            tokio::fs::write(&path, payload_bytes).await?;
-            Ok(())
-        } else {
-            Err(io::Error::new(
-                io::ErrorKind::NotFound,
-                "Blocker not found at given path.",
-            ))
-        }
     }
+    if write_if_absent {
+        debug!("Writing blocker to '{}'", path.display());
+        tokio::fs::create_dir_all(path.parent().unwrap()).await?;
+        tokio::fs::write(&path, payload_bytes).await?;
+        Ok(())
+    } else {
+        Err(io::Error::new(
+            io::ErrorKind::NotFound,
+            "Blocker not found at given path.",
+        ))
+    }
+}
 
+/// Writes/refreshes the blocker at `path`, always revalidating the version (unlike `resolve_blocker`).
+pub async fn install_blocker(path: &Path) -> io::Result<()> {
+    try_load_blocker(path, true, true).await
+}
+
+pub async fn resolve_blocker(provided_path: Option<&Path>) -> io::Result<PathBuf> {
     debug!("Looking for blocker according to cli args...");
     if let Some(config_path) = provided_path {
         if try_load_blocker(config_path, false, true).await.is_ok() {
