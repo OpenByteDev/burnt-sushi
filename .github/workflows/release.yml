@@ -30,7 +30,7 @@ jobs:
       - name: Install nightly for ${{ matrix.target }}
         uses: dtolnay/rust-toolchain@nightly
         with:
-          targets: ${{ matrix.target }}
+          targets: ${{ matrix.target }}, x86_64-pc-windows-msvc
 
       - name: Install Cap'n Proto
         run: choco install capnproto
@@ -47,7 +47,7 @@ jobs:
         run: cargo build --release --manifest-path=shared/Cargo.toml --target ${{ matrix.target }}
 
       - name: Build blocker
-        run: cargo build --release --manifest-path=burnt-sushi-blocker/Cargo.toml --target ${{ matrix.target }}
+        run: cargo build --release --manifest-path=burnt-sushi-blocker/Cargo.toml --target x86_64-pc-windows-msvc
 
       - name: Build cli
         run: cargo build --release --manifest-path=burnt-sushi/Cargo.toml --target ${{ matrix.target }}

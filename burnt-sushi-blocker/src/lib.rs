@@ -1,5 +1,7 @@
 #![feature(once_cell_try)]
 #![warn(clippy::pedantic)]
+#[cfg(not(target_arch = "x86_64"))]
+compile_error!("burnt-sushi-blocker must be built for x86_64 (to match spotify)");
 
 use std::{
     cell::{OnceCell, RefCell},
