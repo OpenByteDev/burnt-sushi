@@ -50,6 +50,7 @@ const APP_VERSION: &str = env!("CARGO_PKG_VERSION");
 const APP_NAME_WITH_VERSION: &str = concat!("BurntSushi v", env!("CARGO_PKG_VERSION"));
 const DEFAULT_BLOCKER_FILE_NAME: &str = "BurntSushiBlocker_x64.dll";
 const DEFAULT_FILTER_FILE_NAME: &str = "filter.toml";
+const AUTOSTART_UPDATE_CHECK_DELAY: Duration = Duration::from_secs(30 * 60);
 
 #[tokio::main(flavor = "current_thread")]
 async fn main() {
@@ -151,6 +152,10 @@ async fn run() {
 
     let (update_restart_tx, update_restart_rx) = tokio::sync::oneshot::channel();
     tokio::task::spawn(async move {
+        if ARGS.autostart {
+            tokio::time::sleep(AUTOSTART_UPDATE_CHECK_DELAY).await;
+        }
+
         match update::update().await {
             Ok(true) => update_restart_tx.send(()).unwrap(),
             Ok(false) => {}
