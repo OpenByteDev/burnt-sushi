@@ -1,26 +1,68 @@
 use std::{
     env,
     io::{self, Write},
-    path::Path,
+    path::{Path, PathBuf},
     process::Stdio,
     ptr,
+    time::Duration,
 };
 
 use anyhow::Context;
-use log::{debug, info};
+use log::{debug, error, info};
 use reqwest::header::HeaderValue;
 use self_update::update::Release;
 use tokio::fs::{self, File};
 use widestring::{U16CString, u16cstr};
 use winapi::um::{shellapi::ShellExecuteW, winuser::SW_SHOWDEFAULT};
 
-use crate::{APP_NAME, APP_VERSION, ARGS, toast};
+use crate::{APP_AUTHOR, APP_NAME, APP_VERSION, ARGS, toast};
+
+const UPDATE_CHECK_INTERVAL: Duration = Duration::from_secs(7 * 24 * 60 * 60);
+
+fn last_check_marker_path() -> Option<PathBuf> {
+    let mut path = dirs::data_local_dir()?;
+    path.push(APP_AUTHOR);
+    path.push(APP_NAME);
+    path.push(".last-update-check");
+    Some(path)
+}
+
+async fn checked_recently(marker: &Path) -> bool {
+    let Ok(metadata) = fs::metadata(marker).await else {
+        return false;
+    };
+    let Ok(modified) = metadata.modified() else {
+        return false;
+    };
+    modified.elapsed().is_ok_and(|elapsed| elapsed < UPDATE_CHECK_INTERVAL)
+}
+
+async fn touch_check_marker(marker: &Path) {
+    if let Some(parent) = marker.parent() {
+        let _ = fs::create_dir_all(parent).await;
+    }
+    if let Err(e) = fs::write(marker, b"").await {
+        error!("Failed to persist update check marker: {e}");
+    }
+}
 
 pub async fn update() -> anyhow::Result<bool> {
+    let marker = last_check_marker_path();
+    if let Some(marker) = &marker {
+        if checked_recently(marker).await {
+            debug!("Skipping update check, already checked within the last week");
+            return Ok(false);
+        }
+    }
+
     let releases = tokio::task::spawn_blocking(load_releases)
         .await
         .context("Failed to load releases")?
         .context("Failed to load releases")?;
+
+    if let Some(marker) = &marker {
+        touch_check_marker(marker).await;
+    }
 
     let (release, release_version) = releases
         .into_iter()
