@@ -9,7 +9,7 @@ edition = "2024"
 keywords = ["spotify", "adblocker", "windows", "blocker", "payload"]
 
 [dependencies]
-dll-syringe = { version = "0.17.0", features = ["payload-utils"], default-features = true }
+dll-syringe = { version = "0.17.1", features = ["payload-utils"], default-features = true }
 capnp = { version = "0.23.0", features = ["alloc"], default-features = false }
 capnp-rpc = { version = "0.23.0", default-features = false }
 futures = { version = "0.3.30", default-features = false }
