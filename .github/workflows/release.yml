@@ -15,28 +15,21 @@ env:
 jobs:
   build:
     runs-on: windows-latest
-    strategy:
-      matrix:
-        include:
-          - target: x86_64-pc-windows-msvc
-            arch: x86_64
-          - target: i686-pc-windows-msvc
-            arch: i686
     steps:
       - uses: actions/checkout@v6
         with:
           ref: ${{ inputs.tag || github.ref }}
 
-      - name: Install nightly for ${{ matrix.target }}
+      - name: Install latest nightly
         uses: dtolnay/rust-toolchain@nightly
         with:
-          targets: ${{ matrix.target }}
+          targets: x86_64-pc-windows-msvc
 
       - name: Install Cap'n Proto
         run: choco install capnproto
 
       - name: Install WiX Toolset
-        run: choco install wixtoolset --version=3.14.1
+        run: choco install wixtoolset
 
       - name: Install cargo-wix
         uses: taiki-e/cache-cargo-install-action@v2
@@ -44,28 +37,28 @@ jobs:
           tool: cargo-wix
 
       - name: Build shared
-        run: cargo build --release --manifest-path=shared/Cargo.toml --target ${{ matrix.target }}
+        run: cargo build --release --manifest-path=shared/Cargo.toml
 
       - name: Build blocker
-        run: cargo build --release --manifest-path=burnt-sushi-blocker/Cargo.toml --target ${{ matrix.target }}
+        run: cargo build --release --manifest-path=burnt-sushi-blocker/Cargo.toml
 
       - name: Build cli
-        run: cargo build --release --manifest-path=burnt-sushi/Cargo.toml --target ${{ matrix.target }}
+        run: cargo build --release --manifest-path=burnt-sushi/Cargo.toml
 
       - name: Rename portable exe
-        run: Copy-Item "burnt-sushi/target/${{ matrix.target }}/release/BurntSushi.exe" "BurntSushi-${{ matrix.arch }}.exe"
+        run: Copy-Item "burnt-sushi/target/x86_64-pc-windows-msvc/release/BurntSushi.exe" "BurntSushi-x86_64.exe"
 
       - name: Build MSI installer
         working-directory: burnt-sushi
-        run: cargo wix --target ${{ matrix.target }} --nocapture --output ../BurntSushi-${{ matrix.arch }}.msi
+        run: cargo wix --nocapture --output ../BurntSushi-x86_64.msi
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: burnt-sushi-${{ matrix.arch }}
+          name: burnt-sushi-x86_64
           path: |
-            BurntSushi-${{ matrix.arch }}.exe
-            BurntSushi-${{ matrix.arch }}.msi
+            BurntSushi.exe
+            BurntSushi.msi
 
   release:
     needs: build
