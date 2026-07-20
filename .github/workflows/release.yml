@@ -2,11 +2,11 @@ name: Release
 
 on:
   push:
-    tags: [ 'v*' ]
+    tags: [ '[0-9]+.[0-9]+.[0-9]+' ]
   workflow_dispatch:
     inputs:
       tag:
-        description: 'Tag to release (e.g. v0.3.3)'
+        description: 'Tag to release (e.g. 0.3.3)'
         required: true
 
 env:
