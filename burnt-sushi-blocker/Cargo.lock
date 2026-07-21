@@ -54,7 +54,7 @@ dependencies = [
  "shared",
  "tokio",
  "tokio-util",
- "winapi",
+ "windows-sys 0.60.2",
  "winres",
 ]
 

@@ -9,17 +9,17 @@ use cef::{_cef_request_t, _cef_string_utf16_t};
 use dll_syringe::process::OwnedProcessModule;
 use retour::static_detour;
 use shared::rpc::blocker_service::FilterHook;
-use winapi::{
-    shared::{minwindef::INT, ntdef::PCSTR, ws2def::ADDRINFOA},
-    um::winsock2::WSAHOST_NOT_FOUND,
+use windows_sys::{
+    Win32::Networking::WinSock::{ADDRINFOA, WSAHOST_NOT_FOUND},
+    core::PCSTR,
 };
 
 use crate::{cef, filters::Filters, utils::panic_info_to_string};
 
 type GetAddrInfoFn =
-    unsafe extern "system" fn(PCSTR, PCSTR, *const ADDRINFOA, *const *const ADDRINFOA) -> INT;
+    unsafe extern "system" fn(PCSTR, PCSTR, *const ADDRINFOA, *const *const ADDRINFOA) -> i32;
 static_detour! {
-    static GetAddrInfoHook: unsafe extern "system" fn(PCSTR, PCSTR, *const ADDRINFOA, *const *const ADDRINFOA) -> INT;
+    static GetAddrInfoHook: unsafe extern "system" fn(PCSTR, PCSTR, *const ADDRINFOA, *const *const ADDRINFOA) -> i32;
 }
 type CefUrlRequestCreateFn =
     unsafe extern "C" fn(*mut _cef_request_t, *mut c_void, *mut c_void) -> *mut c_void;
@@ -77,7 +77,7 @@ fn init_get_addr_info_hook(
             getaddrinfo,
             move |node_name, service_name, hints, result| {
                 let res = std::panic::catch_unwind(AssertUnwindSafe(|| {
-                    let url = CStr::from_ptr(node_name).to_str().unwrap(); // TODO:
+                    let url = CStr::from_ptr(node_name.cast()).to_str().unwrap(); // TODO:
                     let block = !filters.check(FilterHook::GetAddrInfo, url);
 
                     let _ = log_tx.send(LogParams::Request {

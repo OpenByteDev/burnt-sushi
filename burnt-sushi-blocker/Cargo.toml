@@ -15,8 +15,8 @@ capnp-rpc = { version = "0.23.0", default-features = false }
 futures = { version = "0.3.30", default-features = false }
 tokio = { version = "1.38.1", features = ["net", "rt", "macros", "sync"], default-features = false }
 tokio-util = { version = "0.7.11", features = ["compat"], default-features = false }
-winapi = { version = "0.3.9", features = ["ws2tcpip", "rpc"], default-features = false }
 retour = { version = "0.4.0-alpha.4", features = ["nightly", "static-detour"], default-features = false }
+windows-sys = { version = ">=0.59, <=0.61", features = ["Win32_Networking_WinSock"], default-features = false }
 shared = { path = "../shared", default-features = false }
 regex = { version = "1.10.5", default-features = false }
 enum-map = { version = "2.7.3", default-features = false }
