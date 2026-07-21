@@ -8,9 +8,9 @@ use native_windows_gui as nwg;
 
 use nwd::NwgUi;
 use nwg::NativeUi;
-use winapi::um::{
-    processthreadsapi::GetCurrentThreadId,
-    winuser::{PostThreadMessageW, WM_QUIT},
+use windows_sys::Win32::{
+    System::Threading::GetCurrentThreadId,
+    UI::WindowsAndMessaging::{PostThreadMessageW, WM_QUIT},
 };
 
 use crate::{

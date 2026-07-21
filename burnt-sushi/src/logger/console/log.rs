@@ -12,14 +12,12 @@ use std::{
 use dll_syringe::process::{OwnedProcess, Process};
 use project_uninit::partial_init;
 use widestring::U16CString;
-use winapi::{
-    shared::minwindef::{FALSE, TRUE},
-    um::{
-        handleapi::{CloseHandle, SetHandleInformation},
-        minwinbase::SECURITY_ATTRIBUTES,
-        namedpipeapi::CreatePipe,
-        processthreadsapi::{CreateProcessW, STARTUPINFOW},
-        winbase::{CREATE_NEW_CONSOLE, HANDLE_FLAG_INHERIT, STARTF_USESTDHANDLES},
+use windows_sys::Win32::{
+    Foundation::{CloseHandle, FALSE, HANDLE_FLAG_INHERIT, SetHandleInformation, TRUE},
+    Security::SECURITY_ATTRIBUTES,
+    System::{
+        Pipes::CreatePipe,
+        Threading::{CREATE_NEW_CONSOLE, CreateProcessW, STARTF_USESTDHANDLES, STARTUPINFOW},
     },
 };
 

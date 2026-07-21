@@ -17,9 +17,9 @@
 use anyhow::{Context, anyhow};
 use dll_syringe::process::{OwnedProcess, Process};
 use log::{debug, error, info, trace, warn};
-use winapi::{
-    shared::minwindef::FALSE,
-    um::{processthreadsapi::OpenProcess, synchapi::WaitForSingleObject, winnt::PROCESS_TERMINATE},
+use windows_sys::Win32::{
+    Foundation::FALSE,
+    System::Threading::{OpenProcess, PROCESS_TERMINATE, WaitForSingleObject},
 };
 
 use std::{

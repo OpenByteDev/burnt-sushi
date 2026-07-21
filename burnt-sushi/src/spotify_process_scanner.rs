@@ -9,22 +9,18 @@ use std::{
     os::windows::prelude::{AsRawHandle, HandleOrInvalid, OwnedHandle},
     ptr,
 };
-use winapi::{
-    shared::{
-        minwindef::{BOOL, FALSE},
-        windef::HWND,
-        winerror::ERROR_NO_MORE_FILES,
-    },
-    um::{
-        errhandlingapi::{GetLastError, SetLastError},
-        tlhelp32::{
+use windows_sys::{
+    Win32::{
+        Foundation::{ERROR_NO_MORE_FILES, FALSE, GetLastError, HWND, SetLastError},
+        System::Diagnostics::ToolHelp::{
             CreateToolhelp32Snapshot, TH32CS_SNAPTHREAD, THREADENTRY32, Thread32First, Thread32Next,
         },
-        winuser::{
+        UI::WindowsAndMessaging::{
             EnumChildWindows, EnumThreadWindows, GetClassNameW, GetWindowTextLengthW,
             GetWindowTextW, GetWindowThreadProcessId,
         },
     },
+    core::BOOL,
 };
 use wineventhook::{AccessibleObjectId, EventFilter, WindowEventHook, WindowHandle, raw_event};
 

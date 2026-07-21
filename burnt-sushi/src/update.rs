@@ -13,7 +13,7 @@ use reqwest::header::HeaderValue;
 use self_update::update::Release;
 use tokio::fs::{self, File};
 use widestring::{U16CString, u16cstr};
-use winapi::um::{shellapi::ShellExecuteW, winuser::SW_SHOWDEFAULT};
+use windows_sys::Win32::UI::{Shell::ShellExecuteW, WindowsAndMessaging::SW_SHOWDEFAULT};
 
 use crate::{APP_AUTHOR, APP_NAME, APP_VERSION, ARGS, toast};
 

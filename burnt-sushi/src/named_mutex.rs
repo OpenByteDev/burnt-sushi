@@ -1,14 +1,11 @@
 #![allow(dead_code)]
 
-use std::{io, marker::PhantomData, os::windows::raw::HANDLE, ptr};
+use std::{io, marker::PhantomData, ptr};
 
 use widestring::U16CString;
-use winapi::{
-    shared::winerror::WAIT_TIMEOUT,
-    um::{
-        synchapi::{CreateMutexW, ReleaseMutex, WaitForSingleObject},
-        winbase::{INFINITE, WAIT_ABANDONED, WAIT_OBJECT_0},
-    },
+use windows_sys::Win32::{
+    Foundation::{HANDLE, WAIT_ABANDONED, WAIT_OBJECT_0, WAIT_TIMEOUT},
+    System::Threading::{CreateMutexW, INFINITE, ReleaseMutex, WaitForSingleObject},
 };
 
 #[derive(Debug)]
