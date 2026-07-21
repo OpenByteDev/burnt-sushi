@@ -5,7 +5,7 @@ use std::{
     fs::File,
     io::{self, Write},
     mem::{self, MaybeUninit},
-    os::windows::prelude::{AsRawHandle, FromRawHandle, IntoRawHandle, OwnedHandle},
+    os::windows::prelude::{AsRawHandle, FromRawHandle, OwnedHandle},
     ptr,
 };
 

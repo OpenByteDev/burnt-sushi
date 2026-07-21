@@ -1,4 +1,3 @@
-#![feature(once_cell_try, iter_intersperse, lazy_get)]
 #![warn(unsafe_op_in_unsafe_fn, clippy::pedantic)]
 #![allow(
     non_snake_case,
