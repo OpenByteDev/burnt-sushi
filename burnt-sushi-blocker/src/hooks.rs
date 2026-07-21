@@ -77,7 +77,9 @@ fn init_get_addr_info_hook(
             getaddrinfo,
             move |node_name, service_name, hints, result| {
                 let res = std::panic::catch_unwind(AssertUnwindSafe(|| {
-                    let url = CStr::from_ptr(node_name.cast()).to_str().unwrap(); // TODO:
+                    let Ok(url) = CStr::from_ptr(node_name.cast()).to_str() else {
+                        return false;
+                    };
                     let block = !filters.check(FilterHook::GetAddrInfo, url);
 
                     let _ = log_tx.send(LogParams::Request {
