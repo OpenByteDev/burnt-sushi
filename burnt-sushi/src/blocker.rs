@@ -197,8 +197,7 @@ impl SpotifyHookState {
         .await;
 
         match result {
-            Ok(_)
-            | Err(SyringeError::ProcessInaccessible | SyringeError::ModuleInaccessible) => {}
+            Ok(_) | Err(SyringeError::ProcessInaccessible | SyringeError::ModuleInaccessible) => {}
             Err(e) => error!("Failed to fully unhook Spotify: {e:#?}"),
         }
 

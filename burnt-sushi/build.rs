@@ -52,7 +52,10 @@ fn emit_wix_upgrade_code() {
     let wxs = fs::read_to_string(&wxs_path).unwrap();
     let needle = "UpgradeCode=\"";
     let start = wxs.find(needle).expect("UpgradeCode not found in main.wxs") + needle.len();
-    let end = start + wxs[start..].find('"').expect("Unterminated UpgradeCode attribute");
+    let end = start
+        + wxs[start..]
+            .find('"')
+            .expect("Unterminated UpgradeCode attribute");
     let upgrade_code = &wxs[start..end];
 
     println!("cargo:rustc-env=WIX_UPGRADE_CODE={upgrade_code}");

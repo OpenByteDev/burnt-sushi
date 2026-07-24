@@ -13,7 +13,7 @@ pub struct NamedMutex(HANDLE);
 
 impl NamedMutex {
     pub fn new(name: &str) -> io::Result<Self> {
-        let name = U16CString::from_str(format!("Global\\{}", &name)).unwrap();
+        let name = U16CString::from_str(format!("Global\\{name}")).unwrap();
 
         let handle = unsafe { CreateMutexW(ptr::null_mut(), 0, name.as_ptr()) };
 

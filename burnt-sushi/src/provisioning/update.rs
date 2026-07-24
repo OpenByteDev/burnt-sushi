@@ -15,7 +15,7 @@ use tokio::fs::{self, File};
 use super::{msi, network};
 use crate::{APP_AUTHOR, APP_NAME, APP_VERSION, toast};
 
-const UPDATE_CHECK_INTERVAL: Duration = Duration::from_secs(7 * 24 * 60 * 60);
+const UPDATE_CHECK_INTERVAL: Duration = Duration::from_hours(168);
 
 fn last_check_marker_path() -> Option<PathBuf> {
     let mut path = dirs::data_local_dir()?;
@@ -32,7 +32,9 @@ async fn checked_recently(marker: &Path) -> bool {
     let Ok(modified) = metadata.modified() else {
         return false;
     };
-    modified.elapsed().is_ok_and(|elapsed| elapsed < UPDATE_CHECK_INTERVAL)
+    modified
+        .elapsed()
+        .is_ok_and(|elapsed| elapsed < UPDATE_CHECK_INTERVAL)
 }
 
 async fn touch_check_marker(marker: &Path) {
@@ -199,7 +201,9 @@ fn restart(new_exe: &Path, via_msi: bool) -> anyhow::Result<()> {
     command.args(env::args().skip(1));
 
     if !via_msi {
-        command.arg("--update-old-bin").arg(new_exe.with_extension("exe.bak"));
+        command
+            .arg("--update-old-bin")
+            .arg(new_exe.with_extension("exe.bak"));
     }
 
     command

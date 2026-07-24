@@ -1,7 +1,8 @@
 use windows_sys::Win32::NetworkManagement::WindowsConnectionManager::{
     WCM_CONNECTION_COST_DATA, WCM_CONNECTION_COST_FIXED, WCM_CONNECTION_COST_OVERDATALIMIT,
-    WCM_CONNECTION_COST_ROAMING, WCM_CONNECTION_COST_VARIABLE, WCM_PROFILE_INFO, WCM_PROFILE_INFO_LIST,
-    WcmFreeMemory, WcmGetProfileList, WcmQueryProperty, wcm_intf_property_connection_cost,
+    WCM_CONNECTION_COST_ROAMING, WCM_CONNECTION_COST_VARIABLE, WCM_PROFILE_INFO,
+    WCM_PROFILE_INFO_LIST, WcmFreeMemory, WcmGetProfileList, WcmQueryProperty,
+    wcm_intf_property_connection_cost,
 };
 
 const METERED_COST_MASK: u32 = (WCM_CONNECTION_COST_FIXED
@@ -24,7 +25,7 @@ impl<T> Drop for WcmAlloc<T> {
 /// over its data limit), as opposed to unrestricted/unknown.
 pub fn is_metered_connection() -> bool {
     let mut profile_list_ptr: *mut WCM_PROFILE_INFO_LIST = std::ptr::null_mut();
-    if unsafe { WcmGetProfileList(std::ptr::null(), &mut profile_list_ptr) } != 0 {
+    if unsafe { WcmGetProfileList(std::ptr::null(), &raw mut profile_list_ptr) } != 0 {
         return false;
     }
     let profile_list = WcmAlloc(profile_list_ptr);
@@ -36,9 +37,9 @@ pub fn is_metered_connection() -> bool {
     let profiles =
         unsafe { std::slice::from_raw_parts((*profile_list.0).ProfileInfo.as_ptr(), count) };
 
-    profiles
-        .iter()
-        .any(|profile| query_connection_cost(profile).is_some_and(|cost| cost & METERED_COST_MASK != 0))
+    profiles.iter().any(|profile| {
+        query_connection_cost(profile).is_some_and(|cost| cost & METERED_COST_MASK != 0)
+    })
 }
 
 fn query_connection_cost(profile: &WCM_PROFILE_INFO) -> Option<u32> {
@@ -46,19 +47,22 @@ fn query_connection_cost(profile: &WCM_PROFILE_INFO) -> Option<u32> {
     let mut data_ptr: *mut u8 = std::ptr::null_mut();
     let result = unsafe {
         WcmQueryProperty(
-            &profile.AdapterGUID,
+            &raw const profile.AdapterGUID,
             profile.strProfileName.as_ptr(),
             wcm_intf_property_connection_cost,
             std::ptr::null(),
-            &mut data_size,
-            &mut data_ptr,
+            &raw mut data_size,
+            &raw mut data_ptr,
         )
     };
     let data = WcmAlloc(data_ptr.cast::<WCM_CONNECTION_COST_DATA>());
 
-    if result != 0 || data.0.is_null() || (data_size as usize) < size_of::<WCM_CONNECTION_COST_DATA>() {
+    if result != 0
+        || data.0.is_null()
+        || (data_size as usize) < size_of::<WCM_CONNECTION_COST_DATA>()
+    {
         return None;
     }
 
-    Some(unsafe { (*data.0).ConnectionCost })
+    Some(unsafe { data.0.read_unaligned() }.ConnectionCost)
 }

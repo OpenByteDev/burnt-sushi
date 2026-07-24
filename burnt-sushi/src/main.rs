@@ -9,7 +9,9 @@
     clippy::needless_pass_by_value,
     clippy::cast_possible_wrap,
     clippy::cast_sign_loss,
-    clippy::redundant_closure_for_method_calls
+    clippy::redundant_closure_for_method_calls,
+    clippy::cast_ptr_alignment,
+    clippy::similar_names
 )]
 #![windows_subsystem = "windows"]
 
@@ -49,7 +51,7 @@ const APP_VERSION: &str = env!("CARGO_PKG_VERSION");
 const APP_NAME_WITH_VERSION: &str = concat!("BurntSushi v", env!("CARGO_PKG_VERSION"));
 const DEFAULT_BLOCKER_FILE_NAME: &str = "BurntSushiBlocker_x64.dll";
 const DEFAULT_FILTER_FILE_NAME: &str = "filter.toml";
-const AUTOSTART_UPDATE_CHECK_DELAY: Duration = Duration::from_secs(30 * 60);
+const AUTOSTART_UPDATE_CHECK_DELAY: Duration = Duration::from_mins(30);
 
 #[tokio::main(flavor = "current_thread")]
 async fn main() {

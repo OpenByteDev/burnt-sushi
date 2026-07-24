@@ -25,7 +25,11 @@ fn blocker_matches_current_version(path: &Path) -> bool {
         && u64::from(patch) == expected.patch
 }
 
-async fn try_load_blocker(path: &Path, check_version: bool, write_if_absent: bool) -> io::Result<()> {
+async fn try_load_blocker(
+    path: &Path,
+    check_version: bool,
+    write_if_absent: bool,
+) -> io::Result<()> {
     let payload_bytes = include_bytes!(concat!(env!("OUT_DIR"), "\\BurntSushiBlocker_x64.dll"));
 
     debug!("Looking for blocker at '{}'", path.display());
