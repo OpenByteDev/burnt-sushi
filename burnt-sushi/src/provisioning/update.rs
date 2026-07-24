@@ -12,7 +12,7 @@ use reqwest::header::HeaderValue;
 use self_update::update::Release;
 use tokio::fs::{self, File};
 
-use super::msi;
+use super::{msi, network};
 use crate::{APP_AUTHOR, APP_NAME, APP_VERSION, toast};
 
 const UPDATE_CHECK_INTERVAL: Duration = Duration::from_secs(7 * 24 * 60 * 60);
@@ -74,6 +74,11 @@ fn current_exe() -> anyhow::Result<PathBuf> {
 }
 
 async fn should_check_for_update() -> bool {
+    if network::is_metered_connection() {
+        debug!("Skipping update check, connection is metered");
+        return false;
+    }
+
     let Some(marker) = last_check_marker_path() else {
         return true;
     };
