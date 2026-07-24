@@ -13,7 +13,7 @@
 )]
 #![windows_subsystem = "windows"]
 
-use anyhow::{Context, anyhow};
+use anyhow::Context;
 use dll_syringe::process::{OwnedProcess, Process};
 use log::{debug, error, info, trace, warn};
 use windows_sys::Win32::{
@@ -36,12 +36,12 @@ mod args;
 mod blocker;
 mod logger;
 mod named_mutex;
+mod provisioning;
 mod resolver;
 mod rpc;
 mod spotify_process_scanner;
 mod toast;
 mod tray;
-mod update;
 
 const APP_NAME: &str = "BurntSushi";
 const APP_AUTHOR: &str = "OpenByteDev";
@@ -95,7 +95,7 @@ async fn main() {
     trace!("Running with {:#?}", LazyLock::get(&ARGS).unwrap());
 
     if ARGS.install {
-        match handle_install().await {
+        match provisioning::install::install().await {
             Ok(()) => info!("App successfully installed."),
             Err(e) => error!("Failed to install application: {e}"),
         }
@@ -155,7 +155,7 @@ async fn run() {
             tokio::time::sleep(AUTOSTART_UPDATE_CHECK_DELAY).await;
         }
 
-        match update::update().await {
+        match provisioning::update::update().await {
             Ok(true) => update_restart_tx.send(()).unwrap(),
             Ok(false) => {}
             Err(e) => error!("App update failed: {e:#}"),
@@ -193,23 +193,6 @@ async fn wait_for_ctrl_c() -> Result<(), ctrlc::Error> {
         }
     })?;
     rx.await.unwrap();
-    Ok(())
-}
-
-async fn handle_install() -> anyhow::Result<()> {
-    if !is_elevated::is_elevated() {
-        return Err(anyhow!("Must be run as administrator"));
-    }
-
-    let current_location = env::current_exe().context("Failed to locate current executable")?;
-    let blocker_location = current_location
-        .parent()
-        .ok_or_else(|| anyhow!("Failed to determine parent directory"))?
-        .join(DEFAULT_BLOCKER_FILE_NAME);
-    resolver::install_blocker(&blocker_location)
-        .await
-        .context("Failed to write blocker to disk")?;
-
     Ok(())
 }
 

@@ -1,9 +1,8 @@
 use std::{
     env,
-    io::{self, Write},
+    io::Write,
     path::{Path, PathBuf},
     process::Stdio,
-    ptr,
     time::Duration,
 };
 
@@ -12,10 +11,9 @@ use log::{debug, error, info};
 use reqwest::header::HeaderValue;
 use self_update::update::Release;
 use tokio::fs::{self, File};
-use widestring::{U16CString, u16cstr};
-use windows_sys::Win32::UI::{Shell::ShellExecuteW, WindowsAndMessaging::SW_SHOWDEFAULT};
 
-use crate::{APP_AUTHOR, APP_NAME, APP_VERSION, ARGS, toast};
+use super::msi;
+use crate::{APP_AUTHOR, APP_NAME, APP_VERSION, toast};
 
 const UPDATE_CHECK_INTERVAL: Duration = Duration::from_secs(7 * 24 * 60 * 60);
 
@@ -47,22 +45,51 @@ async fn touch_check_marker(marker: &Path) {
 }
 
 pub async fn update() -> anyhow::Result<bool> {
-    let marker = last_check_marker_path();
-    if let Some(marker) = &marker {
-        if checked_recently(marker).await {
-            debug!("Skipping update check, already checked within the last week");
-            return Ok(false);
-        }
+    if !should_check_for_update().await {
+        return Ok(false);
     }
 
+    let Some(release) = find_latest_release().await? else {
+        return Ok(false);
+    };
+
+    if ask_for_approval(&release.version).await {
+        debug!("Update confirmed");
+    } else {
+        debug!("Update ignored");
+        return Ok(false);
+    }
+
+    let via_msi = perform_update(release).await?;
+
+    restart(&current_exe()?, via_msi).context("Failed to restart with updated executable")?;
+
+    Ok(true)
+}
+
+fn current_exe() -> anyhow::Result<PathBuf> {
+    env::current_exe()
+        .and_then(|p| p.canonicalize())
+        .context("Failed to locate current executable")
+}
+
+async fn should_check_for_update() -> bool {
+    let Some(marker) = last_check_marker_path() else {
+        return true;
+    };
+    if checked_recently(&marker).await {
+        debug!("Skipping update check, already checked within the last week");
+        return false;
+    }
+    touch_check_marker(&marker).await;
+    true
+}
+
+async fn find_latest_release() -> anyhow::Result<Option<Release>> {
     let releases = tokio::task::spawn_blocking(load_releases)
         .await
         .context("Failed to load releases")?
         .context("Failed to load releases")?;
-
-    if let Some(marker) = &marker {
-        touch_check_marker(marker).await;
-    }
 
     let (release, release_version) = releases
         .into_iter()
@@ -72,37 +99,17 @@ pub async fn update() -> anyhow::Result<bool> {
 
     if release_version <= lenient_semver::parse(APP_VERSION).unwrap() {
         info!("No new release found");
-        return Ok(false);
+        return Ok(None);
     }
 
-    if !ARGS.update_elevate_restart {
-        if confirm_update(&release.version).await {
-            debug!("Update confirmed");
-        } else {
-            debug!("Update ignored");
-            return Ok(false);
-        }
-    }
+    Ok(Some(release))
+}
 
-    let current_exe = env::current_exe()
-        .and_then(|p| p.canonicalize())
-        .context("Failed to locate current executable")?;
-    let needs_elevation = !faccess::PathExt::writable(current_exe.parent().unwrap());
-    if needs_elevation {
-        debug!("Elevation is required for update");
-        if is_elevated::is_elevated() {
-            debug!("Already running elevated");
-        } else {
-            debug!("Not currently elevated");
-            debug!("Restarting app elevated");
+async fn perform_update(release: Release) -> anyhow::Result<bool> {
+    let current_exe = current_exe()?;
 
-            restart_elevated().context("Failed to restart with elevation")?;
-
-            return Ok(true);
-        }
-    } else {
-        debug!("Elevation is not required for update");
-    }
+    let via_msi = msi::is_installed();
+    let target_extension = if via_msi { "msi" } else { "exe" };
 
     let asset = release
         .assets
@@ -110,9 +117,9 @@ pub async fn update() -> anyhow::Result<bool> {
         .find(|asset| {
             Path::new(&asset.name)
                 .extension()
-                .is_some_and(|ext| ext.eq_ignore_ascii_case("exe"))
+                .is_some_and(|ext| ext.eq_ignore_ascii_case(target_extension))
         })
-        .context("No release executable asset found")?;
+        .context("No matching release asset found")?;
 
     debug!(
         "Found release asset [{}] at {}",
@@ -137,15 +144,37 @@ pub async fn update() -> anyhow::Result<bool> {
 
     debug!("Downloaded asset to {}", tmp_bin_path.display());
 
+    if via_msi {
+        update_via_msi(&tmp_bin_path, &current_exe).await?;
+    } else {
+        update_via_exe_swap(&tmp_bin_path, &current_exe).await?;
+    }
+
+    Ok(via_msi)
+}
+
+async fn update_via_msi(msi_path: &Path, current_exe: &Path) -> anyhow::Result<()> {
+    let install_dir = current_exe
+        .parent()
+        .context("Failed to determine current install directory")?;
+
+    msi::upgrade(msi_path, install_dir).await?;
+
+    debug!("Installed update via msiexec");
+
+    Ok(())
+}
+
+async fn update_via_exe_swap(tmp_bin_path: &Path, current_exe: &Path) -> anyhow::Result<()> {
     let moved_bin = current_exe.with_extension("exe.bak");
 
-    fs::rename(&current_exe, &moved_bin)
+    fs::rename(current_exe, &moved_bin)
         .await
         .context("Failed to move current executable")?;
-    match fs::rename(&tmp_bin_path, &current_exe).await {
+    match fs::rename(tmp_bin_path, current_exe).await {
         Ok(_) => {}
         Err(e) if e.raw_os_error() == Some(17) => {
-            fs::copy(&tmp_bin_path, &current_exe)
+            fs::copy(tmp_bin_path, current_exe)
                 .await
                 .context("Failed to copy updated executable to current executable path")?;
         }
@@ -157,52 +186,22 @@ pub async fn update() -> anyhow::Result<bool> {
 
     debug!("Switched out binary");
 
-    restart(&current_exe, &moved_bin).context("Failed to restart with updated executable")?;
-
-    Ok(true)
+    Ok(())
 }
 
-fn restart(new_exe: &Path, old_exe: &Path) -> anyhow::Result<()> {
-    let current_args = env::args().skip(1);
+fn restart(new_exe: &Path, via_msi: bool) -> anyhow::Result<()> {
+    let mut command = std::process::Command::new(new_exe);
+    command.args(env::args().skip(1));
 
-    std::process::Command::new(new_exe)
-        .args(current_args)
-        .arg("--update-old-bin")
-        .arg(old_exe)
+    if !via_msi {
+        command.arg("--update-old-bin").arg(new_exe.with_extension("exe.bak"));
+    }
+
+    command
         .arg("--singleton-wait-for-shutdown")
         .stdin(Stdio::inherit())
         .spawn()
         .context("Error spawning process")?;
-
-    Ok(())
-}
-
-fn restart_elevated() -> anyhow::Result<()> {
-    let exe = U16CString::from_os_str(
-        env::current_exe()
-            .context("Failed to locate current executable")?
-            .into_os_string(),
-    )
-    .context("Current executable has an invalid path?")?;
-    let current_args = env::args().skip(1).collect::<Vec<_>>().join(" ");
-    let new_args = "--update-elevate-restart --singleton-wait-for-shutdown";
-    let args = U16CString::from_str(format!("{current_args} {new_args}"))
-        .context("Arguments contain invalid characters")?;
-
-    let result = unsafe {
-        ShellExecuteW(
-            ptr::null_mut(),
-            u16cstr!("runas").as_ptr(),
-            exe.as_ptr(),
-            args.as_ptr(),
-            ptr::null_mut(),
-            SW_SHOWDEFAULT,
-        )
-    };
-
-    if result <= 32 as _ {
-        return Err(io::Error::last_os_error()).context("Failed to run ShellExecuteW");
-    }
 
     Ok(())
 }
@@ -215,7 +214,7 @@ fn load_releases() -> Result<Vec<Release>, self_update::errors::Error> {
         .fetch()
 }
 
-async fn confirm_update(version: &str) -> bool {
+async fn ask_for_approval(version: &str) -> bool {
     toast::show(
         "BurntSushi",
         &format!("Update app to {version}?"),

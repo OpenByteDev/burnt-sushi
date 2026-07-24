@@ -59,9 +59,6 @@ pub struct Args {
     pub update_old_bin: Option<PathBuf>,
 
     #[arg(long, hide = true)]
-    pub update_elevate_restart: bool,
-
-    #[arg(long, hide = true)]
     pub singleton_wait_for_shutdown: bool,
 
     #[arg(long, hide = true)]
