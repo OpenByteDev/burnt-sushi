@@ -6,7 +6,7 @@ use windows_sys::Win32::{
 };
 
 /// `UpgradeCode` from `wix/main.wxs`, constant across all versions of the MSI.
-const UPGRADE_CODE: &str = "31d49aef-51d9-4e4e-ac9e-bb0ebfdebca1";
+const UPGRADE_CODE: &str = env!("WIX_UPGRADE_CODE");
 
 /// Whether an MSI-installed copy of the app (any version) is currently registered
 /// with Windows Installer, as opposed to running as a portable exe.
