@@ -155,7 +155,7 @@ checksum = "46c5e41b57b8bba42a04676d81cb89e9ee8e859a1a66f80a5a72e1cb76b34d43"
 
 [[package]]
 name = "burnt-sushi"
-version = "0.3.2"
+version = "0.3.3"
 dependencies = [
  "anyhow",
  "async-thread",
@@ -186,7 +186,7 @@ dependencies = [
  "toml 0.9.8",
  "version_info",
  "widestring",
- "windows-sys 0.61.2",
+ "windows-sys 0.59.0",
  "wineventhook",
  "winres",
  "winrt-toast",
@@ -1929,7 +1929,7 @@ dependencies = [
 
 [[package]]
 name = "shared"
-version = "0.3.2"
+version = "0.3.3"
 dependencies = [
  "capnp",
  "capnpc",

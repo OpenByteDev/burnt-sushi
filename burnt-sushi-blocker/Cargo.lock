@@ -41,7 +41,7 @@ checksum = "812e12b5285cc515a9c72a5c1d3b6d46a19dac5acfef5265968c166106e31dd3"
 
 [[package]]
 name = "burnt-sushi-blocker"
-version = "0.3.2"
+version = "0.3.3"
 dependencies = [
  "arc-swap",
  "capnp",
@@ -590,7 +590,7 @@ dependencies = [
 
 [[package]]
 name = "shared"
-version = "0.3.2"
+version = "0.3.3"
 dependencies = [
  "capnp",
  "capnpc",
