@@ -75,7 +75,7 @@ pub async fn resolve_blocker(provided_path: Option<&Path>) -> io::Result<PathBuf
         .ok()
         .and_then(|p| p.parent().map(|p| p.join(DEFAULT_BLOCKER_FILE_NAME)))
     {
-        if try_load_blocker(&sibling_path, false, false).await.is_ok() {
+        if try_load_blocker(&sibling_path, true, false).await.is_ok() {
             return Ok(sibling_path);
         }
     }
