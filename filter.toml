@@ -81,8 +81,8 @@ allowlist = [
 denylist = [
     'https://spclient\.wg\.spotify\.com/ads/.*', # ads
     'https://spclient\.wg\.spotify\.com/ad-logic/.*', # ads
-    'https://[^/]*spclient\.spotify\.com/ads/.*', # ads
-    'https://[^/]*spclient\.spotify\.com/ad-logic/.*', # ads
-    'https://spclient\.wg\.spotify\.com/gabo-receiver-service/.*', # tracking
+    'https://.*\.spotify\.com/ads/.*', # ads
+    'https://.*\.spotify\.com/ad-logic/.*', # ads
+    'https://.*\.spotify\.com/gabo-receiver-service/.*', # tracking
 ]
 
