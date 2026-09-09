@@ -1,6 +1,6 @@
 [package]
 name = "burnt-sushi-blocker"
-version = "0.4.0"
+version = "0.4.1"
 description = "Spotify AdBlocker for Windows"
 repository = "https://github.com/OpenByteDev/burnt-sushi"
 license = "MIT"
