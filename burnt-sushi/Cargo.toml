@@ -54,3 +54,9 @@ codegen-units = 1
 [[bin]]
 name = "BurntSushi"
 path = "src/main.rs"
+
+[lints.cargo]
+non_kebab_case_bins = "allow"
+
+[package.metadata.wix]
+linker-args = ["-sice:ICE91"]
