@@ -20,6 +20,11 @@ jobs:
         with:
           ref: ${{ inputs.tag || github.ref }}
 
+      - name: Check tag matches Cargo.toml versions
+        run: |
+          $bad = Select-String '^version = "(.*)"' */Cargo.toml | ? { $_.Matches.Groups[1].Value -ne "${{ inputs.tag || github.ref_name }}" }
+          if ($bad) { throw "version does not match tag: $bad" }
+
       - name: Install latest nightly
         uses: dtolnay/rust-toolchain@nightly
         with:
