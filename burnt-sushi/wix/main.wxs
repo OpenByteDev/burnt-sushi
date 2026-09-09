@@ -53,7 +53,6 @@
 
         <ComponentGroup Id="ProductComponents" Directory="APPLICATIONFOLDER">
             <ComponentRef Id="Binary" />
-            <ComponentRef Id="Autostart" />
         </ComponentGroup>
 
         <Directory Id="TARGETDIR" Name="SourceDir">
@@ -64,6 +63,9 @@
                             <Component Id="Binary" Guid="b71b3041-4057-43bb-8711-6be7a2e2c288">
                                 <File Id="Executable" Name="BurntSushi.exe" DiskId="1" Source="$(var.CargoTargetBinDir)\BurntSushi.exe" KeyPath="no" />
                                 <RegistryValue Root="HKCU" Key="Software\OpenByte\BurntSushi" Name="Installed" Type="integer" Value="1" KeyPath="yes" />
+                                <RegistryKey Root="HKCU" Key="Software\Microsoft\Windows\CurrentVersion\Run">
+                                    <RegistryValue Type="string" Name="BurntSushi" Value="&quot;[#Executable]&quot; --autostart" KeyPath="no" />
+                                </RegistryKey>
                                 <RemoveFile Id="RemoveBlockerDll" On="uninstall" Name="*.dll" />
                                 <RemoveFolder Id="LeftOverAppsRemove" On="uninstall" Directory="APPLICATIONFOLDER" />
                                 <RemoveFolder Id="RemoveManufacturerFolder" On="uninstall" Directory="ManufacturerFolder" />
@@ -74,12 +76,6 @@
                 </Directory>
             </Directory>
         </Directory>
-
-        <Component Id="Autostart" Directory="APPLICATIONFOLDER" Guid="158d9da6-fb49-4ae7-8da7-9f7fefe3f8b9">
-            <RegistryKey Root="HKCU" Key="Software\Microsoft\Windows\CurrentVersion\Run">
-                <RegistryValue Type="string" Name="BurntSushi" Value="&quot;[#Executable]&quot; --autostart" KeyPath="yes" />
-            </RegistryKey>
-        </Component>
 
         <Property Id="WIXUI_EXITDIALOGOPTIONALCHECKBOXTEXT" Value="Launch BurntSushi" />
         <Property Id="WixShellExecTarget" Value="[#Executable]" />
