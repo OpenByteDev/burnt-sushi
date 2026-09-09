@@ -305,7 +305,6 @@ dependencies = [
  "async-thread",
  "capnp",
  "capnp-rpc",
- "cargo-emit",
  "chrono",
  "clap",
  "ctrlc",
@@ -318,7 +317,6 @@ dependencies = [
  "log",
  "native-windows-derive",
  "native-windows-gui",
- "pipedconsole",
  "project-uninit",
  "reqwest",
  "self_update",
@@ -1668,15 +1666,6 @@ name = "pin-utils"
 version = "0.1.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "8b870d8c151b6f2fb93e84a13146138f05d02ed11c7e7c54f8826aaaf7c9f184"
-
-[[package]]
-name = "pipedconsole"
-version = "0.3.2"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "641a2033c9a52880d2548ebb50dce6bba5a054fdd4926051e19dd660c753d27b"
-dependencies = [
- "winapi",
-]
 
 [[package]]
 name = "piper"
