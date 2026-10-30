@@ -6,7 +6,7 @@ use futures::{AsyncReadExt, FutureExt};
 use log::{debug, info};
 use tokio::net::ToSocketAddrs;
 
-use crate::blocker::FilterConfig;
+use crate::{blocker::FilterConfig, stats};
 
 struct LoggerImpl;
 
@@ -18,13 +18,17 @@ impl shared::rpc::blocker_service::logger::Server for LoggerImpl {
     ) -> impl futures::Future<Output = Result<(), capnp::Error>> + 'static {
         let request = pry!(pry!(params.get()).get_request());
 
-        let block_sign = if request.get_blocked() { '-' } else { '+' };
+        let blocked = request.get_blocked();
         let hook_name = pry!(request.get_hook());
         let url = pry!(request.get_url());
 
+        if blocked {
+            stats::record_blocked(hook_name);
+        }
+
         debug!(
             "[{}] ({}) {}",
-            block_sign,
+            if blocked { '-' } else { '+' },
             hook_name,
             String::from_utf8_lossy(url.as_bytes())
         );
