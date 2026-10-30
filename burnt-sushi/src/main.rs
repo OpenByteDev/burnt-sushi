@@ -42,6 +42,7 @@ mod provisioning;
 mod resolver;
 mod rpc;
 mod spotify_process_scanner;
+mod spotify_restart;
 mod toast;
 mod tray;
 
@@ -162,6 +163,12 @@ async fn run_singleton() {
 
 async fn run_app() {
     let mut system_tray = tray::SystemTrayManager::build_and_run().await.unwrap();
+
+    if ARGS.restart_spotify {
+        if let Err(e) = spotify_restart::restart_running_spotify().await {
+            error!("Failed to restart Spotify: {e:#}");
+        }
+    }
 
     let mut app = SpotifyAdBlocker::new();
 

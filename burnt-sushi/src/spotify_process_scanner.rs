@@ -246,7 +246,7 @@ fn get_window_process_id(window: WindowHandle) -> NonZeroU32 {
     NonZeroU32::new(unsafe { process_id.assume_init() }).unwrap()
 }
 
-fn is_spotify_process(process: impl Process) -> bool {
+pub fn is_spotify_process(process: impl Process) -> bool {
     match process.base_name() {
         Ok(mut name) => {
             name.make_ascii_lowercase();

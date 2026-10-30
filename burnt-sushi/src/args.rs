@@ -76,6 +76,16 @@ pub struct Args {
     #[arg(long)]
     pub shutdown_with_spotify: bool,
 
+    /// Terminate an already running Spotify on startup and launch it again, so that the
+    /// blocker is active before Spotify makes its first request. Interrupts playback.
+    #[arg(long, overrides_with("no_restart_spotify"))]
+    pub restart_spotify: bool,
+
+    /// Leave an already running Spotify alone on startup. This is the default, the flag
+    /// only exists to override an earlier `--restart-spotify`.
+    #[arg(long, overrides_with("restart_spotify"))]
+    pub no_restart_spotify: bool,
+
     /// Path to the blocker module.
     /// If the file doesn't exist it will be created with the default blocker.
     /// If not specified the app will try to find it in the same directory as the app with name `burnt-sushi-blocker-x86.dll` or write it to a temp file.
