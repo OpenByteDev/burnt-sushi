@@ -42,6 +42,7 @@ mod provisioning;
 mod resolver;
 mod rpc;
 mod spotify_process_scanner;
+mod stats;
 mod toast;
 mod tray;
 
@@ -196,6 +197,14 @@ async fn run_app() {
 
     app.stop().await;
     system_tray.exit().await;
+
+    let counts = stats::blocked_counts();
+    info!(
+        "Blocked {} requests this session ({} hostnames, {} urls)",
+        counts.total(),
+        counts.hosts,
+        counts.urls
+    );
 
     info!("Exiting...");
 }
