@@ -242,6 +242,9 @@ fn restart(new_exe: &Path, via_msi: bool) -> anyhow::Result<()> {
 
     args.push("--singleton-wait-for-shutdown".into());
 
+    // Updates run in the background, they should not interrupt playback.
+    args.push("--no-restart-spotify".into());
+
     if !via_msi {
         args.push("--update-old-bin".into());
         args.push(new_exe.with_extension("exe.bak").into());
