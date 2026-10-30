@@ -149,7 +149,9 @@ impl Console {
 
 impl SimpleLog for Console {
     fn log(&mut self, message: &str) {
-        self.println(message).unwrap();
+        // The window of a piped console can be closed at any point, which breaks the pipe.
+        // Losing a log line is not worth bringing down whatever thread is logging.
+        let _ = self.println(message);
     }
 }
 
