@@ -58,6 +58,7 @@ async fn main() {
     logger::global::init();
 
     log::set_max_level(ARGS.log_level.into_level_filter());
+    logger::global::get().set_console_level(ARGS.console_log_level.into_level_filter());
 
     if !ARGS.no_attach {
         if let Some(console) = Console::attach() {

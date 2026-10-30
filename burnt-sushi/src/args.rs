@@ -51,11 +51,11 @@ fn parse_known_args() -> (Args, Vec<String>) {
 #[command(author, version, about, long_about = None, args_override_self = true)]
 #[allow(clippy::struct_excessive_bools)]
 pub struct Args {
-    /// Show a console window with debug output.
+    /// Show a console window with log output, see `--console-log-level`.
     #[arg(long)]
     pub console: bool,
 
-    /// Do not attach to a parent console to show debug output.
+    /// Do not attach to a parent console to show log output.
     #[arg(long)]
     #[arg(conflicts_with("console"))]
     pub no_attach: bool,
@@ -63,6 +63,12 @@ pub struct Args {
     /// Level of debug output.
     #[arg(long, value_enum, default_value = "debug")]
     pub log_level: LogLevel,
+
+    /// Level of output shown in the console window, which is kept to a readable summary
+    /// by default. Use `debug` to also see every request. Never shows more than
+    /// `--log-level` lets through.
+    #[arg(long, value_enum, default_value = "info")]
+    pub console_log_level: LogLevel,
 
     /// Path to a log file to write to.
     #[arg(long)]

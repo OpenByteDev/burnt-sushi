@@ -6,6 +6,7 @@ use std::{
 use native_windows_derive as nwd;
 use native_windows_gui as nwg;
 
+use log::error;
 use nwd::NwgUi;
 use nwg::NativeUi;
 use windows_sys::Win32::{
@@ -114,16 +115,25 @@ impl SystemTrayIcon {
     fn show_menu(&self) {
         let (x, y) = nwg::GlobalCursor::position();
 
-        let log = logger::global::get();
-        let has_console = log.console.is_some();
+        // Ends the statement holding the lock, so it is released before the menu opens.
+        let has_console = logger::global::get().has_active_console();
         self.tray_item2.set_enabled(!has_console);
+
         self.tray_menu.popup(x, y);
     }
 
     fn show_console(&self) {
-        let mut l = logger::global::get();
-        if l.console.is_none() {
-            l.console = Some(Console::piped().unwrap());
+        // The logger lock is released before logging, it is not reentrant.
+        let result = {
+            let mut logger = logger::global::get();
+            if logger.has_active_console() {
+                return;
+            }
+            Console::piped().map(|console| logger.set_console(console))
+        };
+
+        if let Err(e) = result {
+            error!("Failed to open console: {e}");
         }
     }
 }
