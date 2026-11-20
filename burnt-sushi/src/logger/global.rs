@@ -57,14 +57,20 @@ impl Log for GlobalLoggerHolder {
         }
 
         let mut logger = self.0.lock().unwrap();
-        if let Some(log) = &mut logger.console {
+        if let Some(console) = &mut logger.console {
             let message = format!("[{}] {}", record.level(), record.args());
-            log.log(&message);
+            if let Err(e) = console.log(&message) {
+                eprintln!("Failed to write to console ({e:#}): {message}");
+                logger.console = None;
+            }
         }
-        if let Some(log) = &mut logger.file {
+        if let Some(file) = &mut logger.file {
             let date_time = Local::now().format("%Y-%m-%d %H:%M:%S");
             let message = format!("{} [{}] {}", date_time, record.level(), record.args());
-            log.log(&message);
+            if let Err(e) = file.log(&message) {
+                eprintln!("Failed to write to log file ({e:#}): {message}");
+                logger.file = None;
+            }
         }
     }
 

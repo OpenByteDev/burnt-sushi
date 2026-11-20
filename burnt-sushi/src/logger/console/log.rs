@@ -148,8 +148,9 @@ impl Console {
 }
 
 impl SimpleLog for Console {
-    fn log(&mut self, message: &str) {
-        self.println(message).unwrap();
+    fn log(&mut self, message: &str) -> anyhow::Result<()> {
+        self.println(message)?;
+        Ok(())
     }
 }
 

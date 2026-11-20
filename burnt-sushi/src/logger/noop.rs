@@ -5,5 +5,7 @@ use super::SimpleLog;
 pub struct NoopLog;
 
 impl SimpleLog for NoopLog {
-    fn log(&mut self, _message: &str) {}
+    fn log(&mut self, _message: &str) -> anyhow::Result<()> {
+        Ok(())
+    }
 }

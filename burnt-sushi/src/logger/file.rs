@@ -41,7 +41,7 @@ impl FileLog {
             .open(&self.path)
             .context("Failed to open or create log file.")?;
 
-        if file.metadata().unwrap().len() > 10 * 1024 * 1024
+        if file.metadata()?.len() > 10 * 1024 * 1024
         /* 10mb */
         {
             file = File::options()
@@ -76,12 +76,10 @@ impl FileLog {
 }
 
 impl SimpleLog for FileLog {
-    fn log(&mut self, message: &str) {
-        let file = self
-            .open_file()
-            .context("Failed to prepare log file.")
-            .unwrap();
-        writeln!(file, "{message}").unwrap();
-        file.flush().unwrap();
+    fn log(&mut self, message: &str) -> anyhow::Result<()> {
+        let file = self.open_file().context("Failed to prepare log file.")?;
+        writeln!(file, "{message}")?;
+        file.flush()?;
+        Ok(())
     }
 }
