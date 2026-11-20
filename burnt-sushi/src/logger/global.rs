@@ -44,6 +44,15 @@ impl GlobalLogger {
             file: None,
         }
     }
+
+    pub fn has_console(&self) -> bool {
+        self.console.as_ref().is_some_and(Console::is_active)
+    }
+
+    #[allow(dead_code)]
+    pub fn has_log_file(&self) -> bool {
+        self.file.is_some()
+    }
 }
 
 impl Log for GlobalLoggerHolder {

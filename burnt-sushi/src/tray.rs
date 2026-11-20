@@ -1,5 +1,6 @@
 use std::cell::RefCell;
 
+use log::error;
 use tokio::sync::oneshot;
 use tray_icon::{
     Icon, MouseButtonState, TrayIcon, TrayIconBuilder, TrayIconEvent,
@@ -110,7 +111,7 @@ fn on_tray_icon_event(event: TrayIconEvent) {
         ..
     } = event
     {
-        let has_console = logger::global::get().console.is_some();
+        let has_console = logger::global::get().has_console();
         TRAY_STATE.with_borrow(|state| {
             if let Some(state) = state {
                 state.show_console.set_enabled(!has_console);
@@ -128,9 +129,17 @@ fn on_menu_event(event: MenuEvent) {
 }
 
 fn show_console() {
-    let mut l = logger::global::get();
-    if l.console.is_none() {
-        l.console = Some(Console::piped().unwrap());
+    let mut logger = logger::global::get();
+    if logger.has_console() {
+        return;
+    }
+
+    match Console::piped() {
+        Ok(console) => logger.console = Some(console),
+        Err(e) => {
+            drop(logger);
+            error!("Failed to open console: {e}");
+        }
     }
 }
 
