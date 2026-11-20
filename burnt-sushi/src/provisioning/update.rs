@@ -80,7 +80,7 @@ pub async fn update() -> anyhow::Result<bool> {
 
 fn current_exe() -> anyhow::Result<PathBuf> {
     env::current_exe()
-        .and_then(|p| std::path::absolute(p))
+        .and_then(std::path::absolute)
         .context("Failed to locate current executable")
 }
 
