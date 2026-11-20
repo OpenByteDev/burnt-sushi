@@ -1,129 +1,143 @@
-use std::{
-    sync::atomic::{AtomicBool, Ordering},
-    thread,
-};
+use std::cell::RefCell;
 
-use native_windows_derive as nwd;
-use native_windows_gui as nwg;
-
-use nwd::NwgUi;
-use nwg::NativeUi;
-use windows_sys::Win32::{
-    System::Threading::GetCurrentThreadId,
-    UI::WindowsAndMessaging::{PostThreadMessageW, WM_QUIT},
+use tokio::sync::oneshot;
+use tray_icon::{
+    Icon, MouseButtonState, TrayIcon, TrayIconBuilder, TrayIconEvent,
+    menu::{Menu, MenuEvent, MenuItem},
 };
 
 use crate::{
     APP_NAME,
     logger::{self, Console},
+    message_loop::{MessageLoop, QuitHandle},
 };
 
-static INITIALIZED: AtomicBool = AtomicBool::new(false);
+const SHOW_CONSOLE_ID: &str = "show-console";
+const EXIT_ID: &str = "exit";
 
-pub struct SystemTrayManager {
-    ui_thread: Option<thread::JoinHandle<()>>,
-    exit_recv: tokio::sync::watch::Receiver<bool>,
-    thread_id: u32,
+thread_local! {
+    static TRAY_STATE: RefCell<Option<TrayState>> = const { RefCell::new(None) };
 }
 
-impl SystemTrayManager {
-    pub async fn build_and_run() -> Result<Self, nwg::NwgError> {
-        if !INITIALIZED.swap(true, Ordering::SeqCst) {
-            nwg::init()?;
-        }
+pub struct Tray {
+    quit: QuitHandle,
+    thread: Option<async_thread::JoinHandle<()>>,
+}
 
-        let (start_tx, start_rx) = tokio::sync::oneshot::channel();
-        let (exit_tx, exit_rx) = tokio::sync::watch::channel(false);
+impl Tray {
+    pub async fn spawn(exit_tx: oneshot::Sender<()>) -> anyhow::Result<Self> {
+        let (started_tx, started_rx) = oneshot::channel();
 
-        let ui_thread = thread::spawn(move || {
-            let _tray_icon = match SystemTrayIcon::build_ui(SystemTrayIcon::default()) {
-                Ok(tray_icon) => tray_icon,
-                Err(err) => {
-                    start_tx.send(Err(err)).unwrap();
-                    exit_tx.send(true).unwrap();
-                    return;
-                }
-            };
+        let thread = async_thread::spawn(move || {
+            let message_loop = MessageLoop::new();
+            if let Err(err) = TrayState::install(exit_tx) {
+                let _ = started_tx.send(Err(err));
+                return;
+            }
+            let _ = started_tx.send(Ok(message_loop.quit_handle()));
 
-            let thread_id = unsafe { GetCurrentThreadId() };
-            start_tx.send(Ok(thread_id)).unwrap();
+            message_loop.run();
 
-            nwg::dispatch_thread_events();
-
-            exit_tx.send(true).unwrap();
+            TrayState::uninstall();
         });
 
+        let quit = started_rx.await.unwrap()?;
+
         Ok(Self {
-            ui_thread: Some(ui_thread),
-            thread_id: start_rx.await.unwrap()?,
-            exit_recv: exit_rx,
+            quit,
+            thread: Some(thread),
         })
     }
 
-    pub async fn wait_for_exit(&mut self) {
-        if self.ui_thread.is_none() || *self.exit_recv.borrow() {
-            return;
-        }
-
-        self.exit_recv.changed().await.unwrap();
-
-        if let Some(ui_thread) = self.ui_thread.take() {
-            ui_thread.join().unwrap();
-        }
-    }
-
     pub async fn exit(mut self) {
-        unsafe { PostThreadMessageW(self.thread_id, WM_QUIT, 0, 0) };
-        self.wait_for_exit().await;
-    }
-}
-
-#[derive(NwgUi, Default)]
-pub struct SystemTrayIcon {
-    #[nwg_control]
-    window: nwg::MessageWindow,
-
-    #[nwg_resource]
-    embed: nwg::EmbedResource,
-
-    #[nwg_resource(source_embed: Some(&data.embed), source_embed_str: Some("TRAYICON"))]
-    icon: nwg::Icon,
-
-    #[nwg_control(icon: Some(&data.icon), tip: Some(APP_NAME))]
-    #[nwg_events(MousePressLeftUp: [SystemTrayIcon::show_menu], OnContextMenu: [SystemTrayIcon::show_menu])]
-    tray: nwg::TrayNotification,
-
-    #[nwg_control(parent: window, popup: true)]
-    tray_menu: nwg::Menu,
-
-    #[nwg_control(parent: tray_menu, text: "Show Console")]
-    #[nwg_events(OnMenuItemSelected: [SystemTrayIcon::show_console])]
-    tray_item2: nwg::MenuItem,
-
-    #[nwg_control(parent: tray_menu, text: "Exit")]
-    #[nwg_events(OnMenuItemSelected: [SystemTrayIcon::exit])]
-    tray_item3: nwg::MenuItem,
-}
-
-#[allow(clippy::unused_self)]
-impl SystemTrayIcon {
-    fn exit(&self) {
-        nwg::stop_thread_dispatch();
-    }
-
-    fn show_menu(&self) {
-        let (x, y) = nwg::GlobalCursor::position();
-
-        let log = logger::global::get();
-        let has_console = log.console.is_some();
-        self.tray_item2.set_enabled(!has_console);
-        self.tray_menu.popup(x, y);
-    }
-
-    fn show_console(&self) {
-        let mut l = logger::global::get();
-        if l.console.is_none() {
-            l.console = Some(Console::piped().unwrap());
+        self.quit.quit();
+        if let Some(thread) = self.thread.take() {
+            thread.join().await.unwrap();
         }
     }
+}
+
+impl Drop for Tray {
+    fn drop(&mut self) {
+        if self.thread.is_some() {
+            self.quit.quit();
+        }
+    }
+}
+
+struct TrayState {
+    _icon: TrayIcon,
+    show_console: MenuItem,
+    exit_tx: Option<oneshot::Sender<()>>,
+}
+
+impl TrayState {
+    fn install(exit_tx: oneshot::Sender<()>) -> anyhow::Result<()> {
+        anyhow::ensure!(
+            TRAY_STATE.with_borrow(Option::is_none),
+            "A tray already exists on this thread"
+        );
+
+        let show_console = MenuItem::with_id(SHOW_CONSOLE_ID, "Show Console", true, None);
+        let exit = MenuItem::with_id(EXIT_ID, "Exit", true, None);
+        let menu = Menu::with_items(&[&show_console, &exit])?;
+
+        let icon = TrayIconBuilder::new()
+            .with_icon(Icon::from_resource_name("TRAYICON", None)?)
+            .with_tooltip(APP_NAME)
+            .with_menu(Box::new(menu))
+            .build()?;
+
+        TRAY_STATE.set(Some(Self {
+            _icon: icon,
+            show_console,
+            exit_tx: Some(exit_tx),
+        }));
+        TrayIconEvent::set_event_handler(Some(on_tray_icon_event));
+        MenuEvent::set_event_handler(Some(on_menu_event));
+
+        Ok(())
+    }
+
+    fn uninstall() {
+        drop(TRAY_STATE.take());
+    }
+}
+
+fn on_tray_icon_event(event: TrayIconEvent) {
+    if let TrayIconEvent::Click {
+        button_state: MouseButtonState::Up,
+        ..
+    } = event
+    {
+        let has_console = logger::global::get().console.is_some();
+        TRAY_STATE.with_borrow(|state| {
+            if let Some(state) = state {
+                state.show_console.set_enabled(!has_console);
+            }
+        });
+    }
+}
+
+fn on_menu_event(event: MenuEvent) {
+    match event.id.as_ref() {
+        SHOW_CONSOLE_ID => show_console(),
+        EXIT_ID => request_exit(),
+        _ => {}
+    }
+}
+
+fn show_console() {
+    let mut l = logger::global::get();
+    if l.console.is_none() {
+        l.console = Some(Console::piped().unwrap());
+    }
+}
+
+fn request_exit() {
+    TRAY_STATE.with_borrow_mut(|state| {
+        if let Some(exit_tx) = state.as_mut().and_then(|state| state.exit_tx.take()) {
+            let _ = exit_tx.send(());
+        }
+    });
 }

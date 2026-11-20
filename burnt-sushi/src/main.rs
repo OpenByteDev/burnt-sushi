@@ -24,7 +24,8 @@ use windows_sys::Win32::{
 };
 
 use std::{
-    env, io, num::NonZero, os::windows::prelude::FromRawHandle, path::PathBuf, sync::LazyLock, time::Duration,
+    env, io, num::NonZero, os::windows::prelude::FromRawHandle, path::PathBuf, sync::LazyLock,
+    time::Duration,
 };
 
 use crate::{
@@ -37,6 +38,7 @@ use crate::{
 mod args;
 mod blocker;
 mod logger;
+mod message_loop;
 mod named_mutex;
 mod provisioning;
 mod resolver;
@@ -161,7 +163,8 @@ async fn run_singleton() {
 }
 
 async fn run_app() {
-    let mut system_tray = tray::SystemTrayManager::build_and_run().await.unwrap();
+    let (tray_exit_tx, tray_exit_rx) = tokio::sync::oneshot::channel();
+    let system_tray = tray::Tray::spawn(tray_exit_tx).await.unwrap();
 
     let mut app = SpotifyAdBlocker::new();
 
@@ -184,8 +187,8 @@ async fn run_app() {
         _ = wait_for_ctrl_c() => {
             debug!("Ctrl-C received");
         }
-        _ = system_tray.wait_for_exit() => {
-            debug!("System tray exited");
+        Ok(()) = tray_exit_rx => {
+            debug!("Exit requested from system tray");
         }
         Ok(_) = update_restart_rx => {
             debug!("Shutting down due to update");
