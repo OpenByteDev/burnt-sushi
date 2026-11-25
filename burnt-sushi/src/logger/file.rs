@@ -73,13 +73,17 @@ impl FileLog {
         let writer = BufWriter::new(file);
         Ok(self.file.insert(writer))
     }
-}
 
-impl SimpleLog for FileLog {
-    fn log(&mut self, message: &str) -> anyhow::Result<()> {
+    fn write_line(&mut self, message: &str) -> anyhow::Result<()> {
         let file = self.open_file().context("Failed to prepare log file.")?;
         writeln!(file, "{message}")?;
         file.flush()?;
         Ok(())
+    }
+}
+
+impl SimpleLog for FileLog {
+    fn log(&mut self, message: &str) -> anyhow::Result<()> {
+        self.write_line(message).inspect_err(|_| self.file = None)
     }
 }

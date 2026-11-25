@@ -75,7 +75,6 @@ impl Log for GlobalLoggerHolder {
             let message = format!("{} [{}] {}", date_time, record.level(), record.args());
             if let Err(e) = file.log(&message) {
                 fallback_log!("Failed to write to log file ({e:#}): {message}");
-                logger.file = None;
             }
         }
     }

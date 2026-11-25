@@ -140,7 +140,7 @@ impl Console {
 
     pub fn println(&mut self, message: impl Display) -> io::Result<()> {
         match &mut self.0 {
-            ConsoleImpl::Attach | ConsoleImpl::Alloc => println!("{message}"),
+            ConsoleImpl::Attach | ConsoleImpl::Alloc => writeln!(io::stdout(), "{message}")?,
             ConsoleImpl::Piped { pipe, .. } => writeln!(pipe, "{message}")?,
         }
         Ok(())
