@@ -31,12 +31,14 @@ use std::{
 use crate::{
     args::{ARGS, LogLevel},
     blocker::SpotifyAdBlocker,
-    logger::{Console, FileLog},
+    console::Console,
+    logger::FileLog,
     named_mutex::NamedMutex,
 };
 
 mod args;
 mod blocker;
+mod console;
 mod logger;
 mod message_loop;
 mod named_mutex;
@@ -63,14 +65,14 @@ async fn main() {
 
     if !ARGS.no_attach {
         if let Some(console) = Console::attach() {
-            logger::global::get().console = Some(console);
+            logger::global::get().console.attach(console);
             debug!("Attached to console");
         }
     }
 
     if ARGS.console {
         if let Some(console) = Console::alloc() {
-            logger::global::get().console = Some(console);
+            logger::global::get().console.attach(console);
             debug!("Allocated new console");
         }
     }

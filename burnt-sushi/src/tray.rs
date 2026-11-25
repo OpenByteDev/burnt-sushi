@@ -9,7 +9,8 @@ use tray_icon::{
 
 use crate::{
     APP_NAME,
-    logger::{self, Console},
+    console::Console,
+    logger,
     message_loop::{MessageLoop, QuitHandle},
 };
 
@@ -135,10 +136,10 @@ fn show_console() {
     }
 
     match Console::piped() {
-        Ok(console) => logger.console = Some(console),
+        Ok(console) => logger.console.attach(console),
         Err(e) => {
             drop(logger);
-            error!("Failed to open console: {e}");
+            error!("Failed to open console: {e:#}");
         }
     }
 }

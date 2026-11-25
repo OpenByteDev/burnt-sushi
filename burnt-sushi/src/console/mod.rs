@@ -1,5 +1,7 @@
 #![allow(dead_code)]
 
+pub mod raw;
+
 use std::{
     fmt::Display,
     fs::File,
@@ -21,9 +23,7 @@ use windows_sys::Win32::{
     },
 };
 
-use crate::{APP_NAME_WITH_VERSION, logger::SimpleLog};
-
-use super::raw;
+use crate::APP_NAME_WITH_VERSION;
 
 #[derive(Debug)]
 pub struct Console(ConsoleImpl);
@@ -143,13 +143,6 @@ impl Console {
             ConsoleImpl::Attach | ConsoleImpl::Alloc => println!("{message}"),
             ConsoleImpl::Piped { pipe, .. } => writeln!(pipe, "{message}")?,
         }
-        Ok(())
-    }
-}
-
-impl SimpleLog for Console {
-    fn log(&mut self, message: &str) -> anyhow::Result<()> {
-        self.println(message)?;
         Ok(())
     }
 }

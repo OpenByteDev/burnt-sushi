@@ -7,13 +7,13 @@ use std::{
 
 use clap::{Parser, ValueEnum, error::ContextKind};
 
-use crate::logger;
+use crate::console;
 
 pub static IGNORED_ARGS: OnceLock<Vec<String>> = OnceLock::new();
 
 pub static ARGS: LazyLock<Args> = LazyLock::new(|| {
     // Try to attach console for printing errors during argument parsing.
-    logger::console::raw::attach();
+    console::raw::attach();
 
     let (args, ignored) = parse_known_args();
     let _ = IGNORED_ARGS.set(ignored);
