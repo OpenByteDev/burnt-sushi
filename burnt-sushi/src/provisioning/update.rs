@@ -43,7 +43,7 @@ async fn touch_check_marker(marker: &Path) {
         let _ = fs::create_dir_all(parent).await;
     }
     if let Err(e) = fs::write(marker, b"").await {
-        error!("Failed to persist update check marker: {e}");
+        error!("Failed to persist update check marker: {e:#}");
     }
 }
 

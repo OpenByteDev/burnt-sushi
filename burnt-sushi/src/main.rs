@@ -95,7 +95,7 @@ async fn main() {
     if ARGS.install {
         match provisioning::install().await {
             Ok(()) => info!("App successfully installed."),
-            Err(e) => error!("Failed to install application: {e}"),
+            Err(e) => error!("Failed to install application: {e:#}"),
         }
         return;
     }
@@ -130,7 +130,9 @@ async fn main() {
                 error!("App is already running. (use --ignore-singleton to ignore)\nExiting...");
             }
             Err(e) => {
-                error!("Failed to lock singleton mutex: {e} (use --ignore-singleton to ignore)  ");
+                error!(
+                    "Failed to lock singleton mutex: {e:#} (use --ignore-singleton to ignore)  "
+                );
             }
         }
     }
@@ -157,7 +159,7 @@ async fn run_singleton() {
     if let Some(old_bin_path) = &ARGS.update_old_bin {
         info!("Removing old executable at {}.", old_bin_path.display());
         if let Err(e) = tokio::fs::remove_file(old_bin_path).await {
-            warn!("Failed to remove old executable: {e}");
+            warn!("Failed to remove old executable: {e:#}");
         }
     }
 

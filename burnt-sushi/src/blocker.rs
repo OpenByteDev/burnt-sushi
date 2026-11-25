@@ -109,7 +109,7 @@ impl SpotifyHookState {
                     debug!("Stopped RPC of previous blocker");
                 }
                 Err(e) => {
-                    error!("Failed to stop RPC of previous blocker: {e}");
+                    error!("Failed to stop RPC of previous blocker: {e:#}");
                 }
             }
 
