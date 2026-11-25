@@ -78,22 +78,6 @@ pub async fn run(
                 let mut set_ruleset_request = client.set_ruleset_request();
                 set_ruleset_request
                     .get()
-                    .set_hook(shared::rpc::blocker_service::FilterHook::GetAddrInfo);
-                let mut ruleset = set_ruleset_request.get().init_ruleset();
-                let mut whitelist = ruleset
-                    .reborrow()
-                    .init_whitelist(filter_config.allowlist.len() as _);
-                for (i, url) in filter_config.allowlist.iter().enumerate() {
-                    whitelist.set(i as _, url);
-                }
-                let mut _blacklist = ruleset.reborrow().init_blacklist(0);
-                set_ruleset_request.send().promise.await?;
-            }
-
-            {
-                let mut set_ruleset_request = client.set_ruleset_request();
-                set_ruleset_request
-                    .get()
                     .set_hook(shared::rpc::blocker_service::FilterHook::CefUrlRequestCreate);
                 let mut ruleset = set_ruleset_request.get().init_ruleset();
                 let mut blacklist = ruleset

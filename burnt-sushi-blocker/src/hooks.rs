@@ -1,26 +1,12 @@
-use std::{
-    ffi::{CStr, c_void},
-    panic::AssertUnwindSafe,
-    ptr, slice,
-    sync::OnceLock,
-};
+use std::{ffi::c_void, panic::AssertUnwindSafe, ptr, slice, sync::OnceLock};
 
 use cef::{_cef_request_t, _cef_string_utf16_t};
 use dll_syringe::process::OwnedProcessModule;
 use retour::static_detour;
 use shared::rpc::blocker_service::FilterHook;
-use windows_sys::{
-    Win32::Networking::WinSock::{ADDRINFOA, WSAHOST_NOT_FOUND},
-    core::PCSTR,
-};
 
 use crate::{cef, filters::Filters, utils::panic_info_to_string};
 
-type GetAddrInfoFn =
-    unsafe extern "system" fn(PCSTR, PCSTR, *const ADDRINFOA, *const *const ADDRINFOA) -> i32;
-static_detour! {
-    static GetAddrInfoHook: unsafe extern "system" fn(PCSTR, PCSTR, *const ADDRINFOA, *const *const ADDRINFOA) -> i32;
-}
 type CefUrlRequestCreateFn =
     unsafe extern "C" fn(*mut _cef_request_t, *mut c_void, *mut c_void) -> *mut c_void;
 type CefStringUserfreeUtf16FreeFn = unsafe extern "C" fn(*mut _cef_string_utf16_t);
@@ -41,73 +27,20 @@ pub fn enable(
     filters: Filters,
     log_tx: tokio::sync::mpsc::UnboundedSender<LogParams>,
 ) -> Result<(), Box<dyn std::error::Error>> {
-    static GET_ADDR_INFO_HOOK: OnceLock<()> = OnceLock::new();
     static CEF_URL_REQUEST_CREATE_HOOK: OnceLock<()> = OnceLock::new();
 
-    GET_ADDR_INFO_HOOK
-        .get_or_try_init(|| init_get_addr_info_hook(filters.clone(), log_tx.clone()))?;
     CEF_URL_REQUEST_CREATE_HOOK
         .get_or_try_init(|| init_cef_urlrequest_create_hook(filters, log_tx))?;
 
-    unsafe { GetAddrInfoHook.enable() }?;
     unsafe { CefUrlRequestCreateHook.enable() }?;
 
     Ok(())
 }
 
 pub fn disable() -> Result<(), Box<dyn std::error::Error>> {
-    if GetAddrInfoHook.is_enabled() {
-        unsafe { GetAddrInfoHook.disable() }?;
-    }
     if CefUrlRequestCreateHook.is_enabled() {
         unsafe { CefUrlRequestCreateHook.disable()? };
     }
-    Ok(())
-}
-
-fn init_get_addr_info_hook(
-    filters: Filters,
-    log_tx: tokio::sync::mpsc::UnboundedSender<LogParams>,
-) -> Result<(), Box<dyn std::error::Error>> {
-    let ws2 =
-        OwnedProcessModule::find_local_by_name("WS2_32.dll")?.ok_or("WS2_32.dll not found")?;
-    let getaddrinfo = unsafe { ws2.get_local_procedure::<GetAddrInfoFn>("getaddrinfo")? };
-    unsafe {
-        GetAddrInfoHook.initialize(
-            getaddrinfo,
-            move |node_name, service_name, hints, result| {
-                let res = std::panic::catch_unwind(AssertUnwindSafe(|| {
-                    let Ok(url) = CStr::from_ptr(node_name.cast()).to_str() else {
-                        return false;
-                    };
-                    let block = !filters.check(FilterHook::GetAddrInfo, url);
-
-                    let _ = log_tx.send(LogParams::Request {
-                        hook: shared::rpc::blocker_service::FilterHook::GetAddrInfo,
-                        blocked: block,
-                        url: url.to_string(),
-                    });
-
-                    block
-                }));
-
-                let block = match res {
-                    Ok(block) => block,
-                    Err(e) => {
-                        let _ = log_tx.send(LogParams::Message(panic_info_to_string(e)));
-                        false
-                    }
-                };
-
-                if block {
-                    WSAHOST_NOT_FOUND as _
-                } else {
-                    GetAddrInfoHook.call(node_name, service_name, hints, result)
-                }
-            },
-        )
-    }?;
-
     Ok(())
 }
 

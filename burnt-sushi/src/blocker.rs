@@ -207,6 +207,6 @@ impl SpotifyHookState {
 
 #[derive(Deserialize, Debug)]
 pub struct FilterConfig {
-    pub allowlist: Vec<String>,
+    #[serde(default)]
     pub denylist: Vec<String>,
 }
