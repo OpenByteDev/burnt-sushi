@@ -37,6 +37,8 @@ fn copy_filter_config() {
     source_config_path.push("..");
     source_config_path.push("filter.toml");
 
+    println!("cargo:rerun-if-changed={}", source_config_path.display());
+
     let mut target_config_path = PathBuf::from(env::var_os("OUT_DIR").unwrap());
     target_config_path.push("filter.toml");
     fs::copy(source_config_path, target_config_path).unwrap();
